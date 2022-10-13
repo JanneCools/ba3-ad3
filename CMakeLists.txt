@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.23.2)
 project(AD3-project-2022-2023 C)
 
 set(CMAKE_C_STANDARD 17)
