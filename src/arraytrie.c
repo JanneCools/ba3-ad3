@@ -14,7 +14,7 @@ typedef struct atrie {
 
 ArrayTrie* arraytrie_init() {
     ArrayTrie* trie = (ArrayTrie*) malloc(sizeof(ArrayTrie));
-    trie->skip = "";
+    trie->skip = calloc(1, sizeof(char));
     trie->children = NULL;
     trie->string = NULL;
     trie->character = '\0';
@@ -23,9 +23,8 @@ ArrayTrie* arraytrie_init() {
 }
 
 void arraytrie_free(ArrayTrie* trie) {
-    char* string = trie->string;
-    trie->string = NULL;
-    free(string);
+    free(trie->string);
+    free(trie->skip);
     ArrayTrie** children = (ArrayTrie **) trie->children;
     trie->children = NULL;
     int size = trie->children_size;
@@ -36,10 +35,10 @@ void arraytrie_free(ArrayTrie* trie) {
 }
 
 bool arraytrie_search(ArrayTrie* trie, const char* string) {
-    size_t skip_length = strlen(trie->skip);
     int index = 0;
     while (trie->string == NULL) {
-        if (index + skip_length >= strlen(string)) {
+        size_t skip_length = strlen(trie->skip);
+        if (index + skip_length > strlen(string)) {
             return false;
         }
         index += (int) skip_length + 1;
@@ -60,6 +59,9 @@ bool arraytrie_search(ArrayTrie* trie, const char* string) {
 }
 
 bool arraytrie_add(ArrayTrie* trie, const char* string) {
+    if (arraytrie_search(trie, string)) {
+        return false;
+    }
     bool finished = false;
     bool trie_changed = false;
     if (trie->children_size == 0) {
@@ -67,7 +69,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         ArrayTrie* newtrie = calloc(1,sizeof(ArrayTrie));
         newtrie->children_size = 0;
         newtrie->children = NULL;
-        newtrie->skip = "";
+        newtrie->skip = calloc(1, sizeof(char));
         newtrie->character = string[0];
         newtrie->string = malloc((strlen(string)+1) * sizeof(char));
         strcpy(newtrie->string, string);
@@ -91,7 +93,10 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
             ArrayTrie* newnode = calloc(1,sizeof(ArrayTrie));
             newnode->children_size = trie->children_size;
             newnode->children = trie->children;
-            memcpy(newnode->skip, &trie->skip[mutual_skip], skip_length-mutual_skip);
+            newnode->skip = malloc((skip_length-mutual_skip+1) * sizeof(char));
+            strcpy(newnode->skip, &trie->skip[mutual_skip]);
+            newnode->skip[skip_length-mutual_skip] = '\0';
+            //memcpy(newnode->skip, &trie->skip[mutual_skip], skip_length-mutual_skip);
             newnode->character = trie->skip[mutual_skip];
             newnode->string = NULL;
             // nieuw blad maken met de toe te voegen string
@@ -106,7 +111,10 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
             trie->children = realloc(trie->children, 2*sizeof(ArrayTrie*));
             trie->children[0] = newnode;
             trie->children[1] = leaf;
-            memcpy(trie->skip, &string[index], mutual_skip);
+            trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
+            strcpy(trie->skip, &string[index]);
+            trie->skip[mutual_skip] = '\0';
+            //memcpy(trie->skip, &string[index], mutual_skip);
             finished = true;
             trie_changed = true;
         } else {
@@ -127,10 +135,11 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                     ArrayTrie* newleaf = calloc(1,sizeof(ArrayTrie));
                     newleaf->children_size = 0;
                     newleaf->children = NULL;
-                    newleaf->skip = "";
+                    newleaf->skip = calloc(1, sizeof(char));
                     newleaf->character = string[index];
-                    newleaf->string = malloc(strlen(string) * sizeof(char));
+                    newleaf->string = malloc((strlen(string)+1) * sizeof(char));
                     strcpy(newleaf->string, string);
+                    newleaf->string[strlen(string)] = '\0';
                     trie->children_size ++;
                     trie->children = realloc(trie->children, trie->children_size * sizeof(ArrayTrie*));
                     trie->children[trie->children_size-1] = newleaf;
@@ -138,34 +147,40 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                     trie_changed = true;
                 } else if (trie->children[i]->string != NULL) {
                     // de boog die we nemen leidt naar een blad
+                    index ++;
                     if (strcmp(trie->children[i]->string, string) == 0) {
                         // de string in het blad komt overeen met de string die we willen toevoegen
                         finished = true;
                         trie_changed = false;
                     } else {
                         // de string in het blad komt niet overeen met de string die we willen toevoegen
-                        // Dus we moeten een nieuwe top maken
+                        // Dus we moeten een nieuwe top maken met als kinderen het huidig blad en het nieuw blad
+                        // en met als ouder de top waar we nu zijn (trie)
                         ArrayTrie* leaf = trie->children[i];
                         int skip = 0;
-                        while (leaf->string[index+1+skip] == string[index+1+skip]) {
+                        while (leaf->string[index+skip] == string[index+skip]) {
                             skip ++;
                         }
-                        leaf->character = leaf->string[index+1+skip];
+                        leaf->character = leaf->string[index+skip];     // het karakter bij het huidig blad aanpassen
+                        // blad maken met de nieuwe string
                         ArrayTrie* newleaf = calloc(1,sizeof(ArrayTrie));
                         newleaf->children_size = 0;
                         newleaf->children = NULL;
                         newleaf->string = malloc((strlen(string)+1) * sizeof(char));
                         strcpy(newleaf->string, string);
-                        newleaf->skip = "";
-                        newleaf->character = string[index+1+skip];
+                        newleaf->skip = calloc(1, sizeof(char));
+                        newleaf->character = string[index+skip];
+                        // een nieuwe top maken met als ouder "trie"
                         ArrayTrie* node = calloc(1,sizeof(ArrayTrie));
                         node->children_size = 2;
                         node->children = malloc(2 * sizeof(ArrayTrie*));
                         node->children[0] = leaf;
                         node->children[1] = newleaf;
-                        //node->skip = malloc(skip*sizeof(char));
-                        memcpy(node->skip, &string[index+1], skip);
-                        node->character = string[index];
+                        node->skip = malloc((skip+1)*sizeof(char));
+                        strcpy(node->skip, &string[index]);
+                        node->skip[skip] = '\0';
+                        //memcpy(node->skip, &string[index+1], skip);
+                        node->character = string[index-1];
                         trie->children[i] = node;
                         finished = true;
                         trie_changed = true;
@@ -186,7 +201,10 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                 ArrayTrie* newnode = calloc(1,sizeof(ArrayTrie));
                 newnode->children_size = trie->children_size;
                 newnode->children = trie->children;
-                memcpy(newnode->skip, &trie->skip[mutual_skip], skip_length-mutual_skip);
+                newnode->skip = malloc((skip_length-mutual_skip+1) * sizeof(char));
+                strcpy(newnode->skip, &trie->skip[mutual_skip]);
+                newnode->skip[skip_length-mutual_skip] = '\0';
+                //memcpy(newnode->skip, &trie->skip[mutual_skip], skip_length-mutual_skip);
                 newnode->character = trie->skip[mutual_skip];
                 newnode->string = NULL;
                 // nieuw blad maken met de toe te voegen string
@@ -201,10 +219,14 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                 trie->children = realloc(trie->children, 2*sizeof(ArrayTrie*));
                 trie->children[0] = newnode;
                 trie->children[1] = leaf;
-                memcpy(trie->skip, &string[index], mutual_skip);
+                trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
+                strcpy(trie->skip, &string[index]);
+                trie->skip[mutual_skip] = '\0';
+                //memcpy(trie->skip, &string[index], mutual_skip);
                 finished = true;
                 trie_changed = true;
             }
+            free(skip_string);
         }
     }
     return trie_changed;
