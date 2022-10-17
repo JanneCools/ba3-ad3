@@ -233,6 +233,9 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
 }
 
 bool arraytrie_remove(ArrayTrie* trie, const char* string) {
+    if (!arraytrie_search(trie, string)) {
+        return false;
+    }
     bool finished = false;
     bool removed;
     int index = 0;
@@ -241,10 +244,10 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
         char* skip_string = malloc((skip_length+1)*sizeof(char));
         memcpy(skip_string, &string[index], skip_length);
         skip_string[skip_length] = '\0';
-        if (strlen(string) - index - 1 < skip_length || strcmp(skip_string, trie->skip) != 0) {
+        if (strlen(string) - index < skip_length || strcmp(skip_string, trie->skip) != 0) {
             // string zit niet in de boom
             finished = true;
-            removed = true;
+            removed = false;
         } else {
             // de skip in de string is gelijk aan de skip van de top
             index += (int) skip_length;
@@ -287,30 +290,43 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                         free(leaf->string);
                         free(leaf);
                         free(children);
+                        finished = true;
+                        removed = true;
                     } else {
                         // de top heeft maar 1 top na het verwijderen van het blad
                         // dus de boom moet hier wat herschikt worden
                         ArrayTrie* child = trie->children[0];
                         ArrayTrie* leaf = trie->children[1];
-                        if (leaf->string == NULL) {
+                        if (leaf->string == NULL || strcmp(leaf->string, string) != 0) {
                             child = trie->children[1];
                             leaf = trie->children[0];
                         }
                         trie->children[0] = NULL;
                         trie->children[1] = NULL;
-                        free(leaf->string);
-                        free(leaf);
-                        char* skip = malloc((strlen(trie->skip) + strlen(child->skip) + 1) * sizeof(char));
+                        arraytrie_free(leaf);
+                        char* skip = malloc((strlen(trie->skip) + strlen(child->skip) + 2) * sizeof(char));
+                        char character[2] = {child->character, '\0'};
                         strcpy(skip, trie->skip);
+                        strcat(skip, character);
                         strcat(skip, child->skip);
-                        skip[strlen(trie->skip) + strlen(child->skip)] = '\0';
+                        skip[strlen(trie->skip) + strlen(child->skip)+1] = '\0';
                         trie->skip = skip;
                         ArrayTrie** children = child->children;
                         child->children = NULL;
-                        free(trie->children);
-                        trie->children = children;
-                        trie->children_size = child->children_size;
-                        free(child);
+                        //free(trie->children);
+                        if (child->string == NULL) {
+                            free(trie->children);       //TODO nakijken of dit klopt
+                            trie->children = children;
+                            trie->children_size = child->children_size;
+                            free(child);
+                        } else {
+                            trie->children = realloc(trie->children, sizeof(ArrayTrie*));
+                            trie->children[0] = child;
+                            trie->children_size = 1;
+                            child->character = child->string[strlen(trie->skip)];
+                        }
+                        //trie->children = children;
+                        //memcpy(trie->children, child->children, child->children_size * sizeof(ArrayTrie*));
                         finished = true;
                         removed = true;
                     }
