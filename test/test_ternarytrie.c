@@ -61,6 +61,66 @@ void test_add_more() {
     ternarytrie_free(ct);
 }
 
+void test_add_similar_strings() {
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* five = "five";
+    const char* six = "six";
+    const char* seven = "seven";
+    const char* eight = "eight";
+    const char* nine = "nine";
+    const char* ten = "ten";
+    const char* eleven = "eleven";
+    const char* sixteen = "sixteen";
+    const char* seventeen = "seventeen";
+    const char* nineteen = "nineteen";
+    const char* twenty = "twenty";
+    const char* sevens = "sevens";
+
+
+    TEST_CHECK(ternarytrie_add(ct, five));
+    TEST_CHECK(ternarytrie_add(ct, six));
+    TEST_CHECK(ternarytrie_add(ct, seven));
+    TEST_CHECK(ternarytrie_add(ct, eight));
+    TEST_CHECK(ternarytrie_add(ct, nine));
+    TEST_CHECK(ternarytrie_add(ct, ten));
+    TEST_CHECK(ternarytrie_add(ct, eleven));
+    TEST_CHECK(ternarytrie_add(ct, sixteen));
+    TEST_CHECK(ternarytrie_add(ct, seventeen));
+    TEST_CHECK(ternarytrie_add(ct, nineteen));
+    TEST_CHECK(ternarytrie_add(ct, twenty));
+    TEST_CHECK(ternarytrie_add(ct, sevens));
+
+    TEST_SIZE(ct, 12);
+
+    TEST_CHECK(ternarytrie_search(ct, five));
+    TEST_CHECK(ternarytrie_search(ct, six));
+    TEST_CHECK(ternarytrie_search(ct, seven));
+    TEST_CHECK(ternarytrie_search(ct, eight));
+    TEST_CHECK(ternarytrie_search(ct, nine));
+    TEST_CHECK(ternarytrie_search(ct, ten));
+    TEST_CHECK(ternarytrie_search(ct, eleven));
+    TEST_CHECK(ternarytrie_search(ct, sixteen));
+    TEST_CHECK(ternarytrie_search(ct, seventeen));
+    TEST_CHECK(ternarytrie_search(ct, nineteen));
+    TEST_CHECK(ternarytrie_search(ct, twenty));
+    TEST_CHECK(ternarytrie_search(ct, sevens));
+
+    TEST_CHECK(!ternarytrie_add(ct, five));
+    TEST_CHECK(!ternarytrie_add(ct, six));
+    TEST_CHECK(!ternarytrie_add(ct, seven));
+    TEST_CHECK(!ternarytrie_add(ct, eight));
+    TEST_CHECK(!ternarytrie_add(ct, nine));
+    TEST_CHECK(!ternarytrie_add(ct, ten));
+    TEST_CHECK(!ternarytrie_add(ct, eleven));
+    TEST_CHECK(!ternarytrie_add(ct, sixteen));
+    TEST_CHECK(!ternarytrie_add(ct, seventeen));
+    TEST_CHECK(!ternarytrie_add(ct, nineteen));
+    TEST_CHECK(!ternarytrie_add(ct, twenty));
+    TEST_CHECK(!ternarytrie_add(ct, sevens));
+}
+
 void test_remove_one() {
     TernaryTrie* ct = ternarytrie_init();
     TEST_CHECK(ct != NULL);
@@ -110,14 +170,24 @@ void test_remove_not_present() {
     ternarytrie_free(ct);
 }
 
-TEST_LIST = {
+/*TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
         { "ternarytrie add more",test_add_more },
+        { "ternarytrie add similar strings",test_add_similar_strings },
         { "ternarytrie search not present",test_search_not_present},
 
         { "ternarytrie remove one",test_remove_one },
         { "ternarytrie remove more",test_remove_more },
         { "ternarytrie remove not present",test_remove_not_present},
         { NULL, NULL}
+};*/
+
+TEST_LIST = {
+        {"ternarytrie init",test_init },
+        { "ternarytrie add one",test_add_one },
+        { "ternarytrie add more",test_add_more },
+        { "ternarytrie add similar strings",test_add_similar_strings },
+        { "ternarytrie search not present",test_search_not_present},
+        {NULL, NULL}
 };

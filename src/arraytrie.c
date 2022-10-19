@@ -13,12 +13,8 @@ typedef struct atrie {
 
 
 ArrayTrie* arraytrie_init() {
-    ArrayTrie* trie = (ArrayTrie*) malloc(sizeof(ArrayTrie));
+    ArrayTrie* trie = calloc(1, sizeof(ArrayTrie));
     trie->skip = calloc(1, sizeof(char));
-    trie->children = NULL;
-    trie->string = NULL;
-    trie->character = '\0';
-    trie->children_size = 0;
     return trie;
 }
 
@@ -70,12 +66,11 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
     if (trie->children_size == 0) {
         // enkel de wortel kan eventueel geen kinderen hebben, dat betekent dat de boom nog leeg is
         ArrayTrie* newtrie = calloc(1,sizeof(ArrayTrie));
-        newtrie->children_size = 0;
-        newtrie->children = NULL;
         newtrie->skip = calloc(1, sizeof(char));
         newtrie->character = string[0];
         newtrie->string = malloc((strlen(string)+1) * sizeof(char));
         strcpy(newtrie->string, string);
+        newtrie->string[strlen(string)] = '\0';
         trie->children_size = 1;
         trie->children = malloc(sizeof(ArrayTrie*));
         trie->children[0] = newtrie;
@@ -103,9 +98,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
             newnode->character = trie->skip[mutual_skip];
             newnode->string = NULL;
             // nieuw blad maken met de toe te voegen string
-            ArrayTrie* leaf = malloc(sizeof(ArrayTrie));
-            leaf->children= NULL;
-            leaf->children_size = 0;
+            ArrayTrie* leaf = calloc(1,sizeof(ArrayTrie));
             leaf->string = malloc((strlen(string)+1) * sizeof(char));
             strcpy(leaf->string, string);
             leaf->character = string[index+mutual_skip];
@@ -136,8 +129,6 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                 if (i == trie->children_size) {
                     // er is nog geen kind met het karakter van de string dus een blad kan aangemaakt worden
                     ArrayTrie* newleaf = calloc(1,sizeof(ArrayTrie));
-                    newleaf->children_size = 0;
-                    newleaf->children = NULL;
                     newleaf->skip = calloc(1, sizeof(char));
                     newleaf->character = string[index];
                     newleaf->string = malloc((strlen(string)+1) * sizeof(char));
@@ -167,8 +158,6 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                         leaf->character = leaf->string[index+skip];     // het karakter bij het huidig blad aanpassen
                         // blad maken met de nieuwe string
                         ArrayTrie* newleaf = calloc(1,sizeof(ArrayTrie));
-                        newleaf->children_size = 0;
-                        newleaf->children = NULL;
                         newleaf->string = malloc((strlen(string)+1) * sizeof(char));
                         strcpy(newleaf->string, string);
                         newleaf->skip = calloc(1, sizeof(char));
@@ -209,11 +198,8 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                 newnode->skip[skip_length-mutual_skip-1] = '\0';
                 //memcpy(newnode->skip, &trie->skip[mutual_skip], skip_length-mutual_skip);
                 newnode->character = trie->skip[mutual_skip];
-                newnode->string = NULL;
                 // nieuw blad maken met de toe te voegen string
-                ArrayTrie* leaf = malloc(sizeof(ArrayTrie));
-                leaf->children= NULL;
-                leaf->children_size = 0;
+                ArrayTrie* leaf = calloc(1, sizeof(ArrayTrie));
                 leaf->string = malloc((strlen(string)+1) * sizeof(char));
                 strcpy(leaf->string, string);
                 leaf->character = string[index+mutual_skip];
@@ -275,14 +261,6 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                         trie->children[trie->children_size-1] = NULL;
                         trie->children_size --;
                         trie->children = realloc(trie->children, trie->children_size);
-                        /*trie->children = realloc(trie->children, trie->children_size-1);
-                        int k = 0;
-                        for (int j = 0; j < trie->children_size; j++) {
-                            if (j != i) {
-                                trie->children[j] = children[k];
-                                k++;
-                            }
-                        }*/
                         free(leaf->string);
                         free(leaf);
                         finished = true;
