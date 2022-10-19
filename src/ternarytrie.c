@@ -9,6 +9,7 @@ typedef struct ttrie {
     TernaryTrie* left;
     TernaryTrie* right;
     TernaryTrie* equals;
+    TernaryTrie* parent;
 } TernaryTrie;
 
 TernaryTrie* ternarytrie_init() {
@@ -23,14 +24,17 @@ void ternarytrie_free(TernaryTrie* trie) {
     TernaryTrie* equals = trie->equals;
     if (trie->left != NULL) {
         trie->left = NULL;
+        left->parent = NULL;
         ternarytrie_free(left);
     }
     if (trie->right != NULL) {
         trie->right = NULL;
+        right->parent = NULL;
         ternarytrie_free(right);
     }
     if (trie->equals != NULL) {
         trie->equals = NULL;
+        equals->parent = NULL;
         ternarytrie_free(equals);
     }
     free(trie);
@@ -128,7 +132,47 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
 }
 
 bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
-    return strcmp(trie->string, string) == 0;
+    // de string zoeken in de boom
+    int index = 0;
+    while (trie != NULL && trie->string == NULL) {
+        if (string[index] < trie->character) {
+            trie = trie->left;
+        } else if (string[index] > trie->character) {
+            trie = trie->right;
+        } else {
+            trie = trie->equals;
+            index ++;
+        }
+    }
+    if (trie == NULL || strcmp(trie->string, string) != 0) {
+        // de string zit niet in de boom
+        return false;
+    }
+    while (trie->parent != NULL && trie->equals == NULL && trie->left == NULL && trie->right == NULL) {
+        // zolang er lege toppen zijn of de top de wortel is, worden deze verwijderd
+        TernaryTrie* parent = trie->parent;
+        if (parent->right == trie) {
+            parent->right = NULL;
+        } else if (parent->left == trie) {
+            parent->left = NULL;
+        } else {
+            parent->equals = NULL;
+        }
+        if (trie->string != NULL) {
+            free(trie->string);
+        }
+        free(trie);
+        trie = parent;
+    }
+    if (trie->parent == NULL && trie->left == NULL && trie->right == NULL && trie->equals == NULL) {
+        // trie is de wortel
+        trie->character = '\0';
+        if (trie->string != NULL) {
+            free(trie->string);
+            trie->string = NULL;
+        }
+    }
+    return true;
 }
 
 size_t ternarytrie_size(TernaryTrie* trie) {

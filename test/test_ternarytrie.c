@@ -170,7 +170,7 @@ void test_remove_not_present() {
     ternarytrie_free(ct);
 }
 
-/*TEST_LIST = {
+TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
         { "ternarytrie add more",test_add_more },
@@ -181,13 +181,4 @@ void test_remove_not_present() {
         { "ternarytrie remove more",test_remove_more },
         { "ternarytrie remove not present",test_remove_not_present},
         { NULL, NULL}
-};*/
-
-TEST_LIST = {
-        {"ternarytrie init",test_init },
-        { "ternarytrie add one",test_add_one },
-        { "ternarytrie add more",test_add_more },
-        { "ternarytrie add similar strings",test_add_similar_strings },
-        { "ternarytrie search not present",test_search_not_present},
-        {NULL, NULL}
 };
