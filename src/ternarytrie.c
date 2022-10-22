@@ -1,7 +1,6 @@
 #include <malloc.h>
 #include "../include/ternarytrie.h"
 #include "string.h"
-#include "stdio.h"
 
 typedef struct ttrie {
     char character;
@@ -62,6 +61,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
         TernaryTrie* leaf = calloc(1, sizeof(TernaryTrie));
         leaf->string = calloc(strlen(string),sizeof(char));
         strcpy(leaf->string, string);
+        leaf->parent =trie;
         trie->equals = leaf;
         return true;
     }
@@ -71,7 +71,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     bool trie_changed = false;
     size_t index = 0;
     TernaryTrie* parent = trie;
-    // we voeren de while-lus uit zolang we geen NULL-pointer of blad tegenkomen
+    // de while-lus wordt uitgevoerd uit zolang we geen NULL-pointer of blad tegenkomen
     while (trie != NULL && trie->string == NULL) {
         if (string[index] < trie->character) {
             parent = trie;
@@ -97,6 +97,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
         TernaryTrie* leaf = calloc(1, sizeof(TernaryTrie));
         leaf->string = malloc((strlen(string)+1) * sizeof(char));
         strcpy(leaf->string, string);
+        leaf->parent = trie;
         trie->equals = leaf;
         trie_changed = true;
     } else if (strcmp(trie->string, string) == 0) {
@@ -108,6 +109,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
             node = calloc(1, sizeof(TernaryTrie));
             node->character = string[index];
             parent->equals = node;
+            node->parent = parent;
             parent = node;
             index ++;
         }
@@ -126,6 +128,10 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
         node->equals = trie;
         child->equals = newleaf;
         parent->equals = node;
+        child->parent = node;
+        trie->parent = node;
+        newleaf->parent = child;
+        node->parent = parent;
         trie_changed = true;
     }
     return trie_changed;
@@ -145,8 +151,7 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
         }
     }
     if (trie == NULL || strcmp(trie->string, string) != 0) {
-        // de string zit niet in de boom
-        return false;
+        return false; // de string zit niet in de boom
     }
     while (trie->parent != NULL && trie->equals == NULL && trie->left == NULL && trie->right == NULL) {
         // zolang er lege toppen zijn of de top de wortel is, worden deze verwijderd
