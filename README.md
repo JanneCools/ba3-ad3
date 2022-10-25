@@ -12,6 +12,7 @@ Dit jaar onderzoeken we in het project de verschillende soorten tries en wanneer
 ## Functionele vereisten programma
 
 Implementeer drie bibliotheken: `arraytrie`, `ternarytrie` en `customtrie` die elk de implementatie zijn van een soort trie:
+
 - `arraytrie`: een implementatie van een trie waar in elke top de kinderen zijn opgeslagen in een array en waarbij paden gecomprimeerd worden, bijvoorbeeld zoals in **Patricia** tries uit de lesnota's, of op een andere manier.
 - `ternarytrie`: een implementatie van een ternary trie waar elke top door een kleine binaire boom wordt voorgesteld en waarbij je geen paden hoeft te comprimeren.
 - `customtrie`: een eigen implementatie van een trie die zo goed mogelijk presteert voor een gegeven dataset.
@@ -101,9 +102,9 @@ Maak je verslag niet onnodig lang.
 
 Je indiening moet volgende structuur hebben:
 
-- `src/` bevat alle broncode
+- `src/` bevat alle broncode, in de bestanden `extra-sources-{array,ternary,custom}trie` kan je extra bronbestanden meegeven die ook moeten gecompileerd worden
 
-- `include/` bevat de headerbestanden die wij je gegeven hebben, deze mag je niet aanpassen.
+- `include/` bevat de headerbestanden die wij je gegeven hebben, deze mag je niet aanpassen. Je mag hier ook geen extra headerbestanden aan toevoegen: die voeg je toe in `src/`. De overeenkomstige `c`-bestanden van extra headerbestanden plaats je in de `extra-sources`-bestanden.
 
 - `tests/` alle testcode (je moet testcode hebben, push geen grote datafiles
   naar SubGIT, plaats een scriptje dat deze genereert).
@@ -117,6 +118,9 @@ Je directory structuur ziet er dus ongeveer zo uit:
     |-- extra/
     |   `-- verslag.pdf
     |-- src/
+    |   |-- extra-sources-arraytrie (optioneel)
+    |   |-- extra-sources-ternarytrie (optioneel)
+    |   |-- extra-sources-customtrie (optioneel)
     |   `-- je broncode
     |-- include/
     |   |-- arraytrie.h
@@ -149,6 +153,41 @@ docker run -it --rm --mount type=bind,source={PAD},destination=/submission,reado
 
 Waarbij `{PAD}` vervangen dient te worden door het absolute pad naar de hoofdmap
 (niet `src`) van je code.
+
+#### Extra bronbestanden
+
+Wanneer je extra bronbestanden wilt gebruiken en die wilt include-en, dan heb je twee keuzes:
+
+##### Single compilation unit
+
+```c
+#include "common.c"
+```
+
+Je include de extra c-bestanden rechtstreeks zodat alles tot één objectbestand wordt gecompileerd. Deze techniek heet [Single compilation unit (SCU)](https://en.wikipedia.org/wiki/Single_compilation_unit) en zorgt ervoor dat de compiler soms beter kan optimaliseren.
+
+Dit heeft als nadeel dat wanneer je iets in één van de bestanden aanpast, je alles opnieuw moet compileren. Dit project is klein genoeg dat dit weinig effect zal hebben.
+
+Als je deze techniek toepast hoef je niets extra te doen.
+
+##### Header-files
+
+```c
+#include "common.h"
+```
+
+Je include een extra headerbestand waardoor je je code opsplitst in meerdere objectbestanden. Dit wordt over het algemeen gezien als betere programmeerstijl en is waarschijnlijk hoe je aangeleerd hebt om met meerdere bestanden te werken in C.
+
+Omdat je enkel de headerbestanden include, weet de compiler niet welke c-bestanden er nog gecompileerd moeten worden. Die moet je in dit geval oplijsten in een extra bestand `src/extra-sources-{array,ternary,custom}trie` met hun relatief pad ten opzichte van de `src`-map.
+
+Bijvoorbeeld: stel dat je een `arraytrie` hebt die de extra bestanden `src/utilities.c` en `src/common/common.c` nodig hebben, dan maak je een bestand `src/extra-sources-arraytrie` aan met als inhoud:
+
+```
+utilities.c
+common/common.c
+```
+
+
 
 ### SubGIT
 
