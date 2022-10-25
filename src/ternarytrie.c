@@ -103,7 +103,6 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     } else if (strcmp(trie->string, string) == 0) {
         trie_changed = false;
     } else {
-        //TernaryTrie* leaf = trie->equals;
         TernaryTrie* node;
         while (string[index] == trie->string[index]) {
             node = calloc(1, sizeof(TernaryTrie));
@@ -153,15 +152,49 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
     if (trie == NULL || strcmp(trie->string, string) != 0) {
         return false; // de string zit niet in de boom
     }
-    while (trie->parent != NULL && trie->equals == NULL && trie->left == NULL && trie->right == NULL) {
-        // zolang er lege toppen zijn of de top de wortel is, worden deze verwijderd
-        TernaryTrie* parent = trie->parent;
+    TernaryTrie* parent = trie->parent;
+    parent->equals = NULL;
+    free(trie->string);
+    trie->parent = NULL;
+    free(trie);
+    trie = parent;
+    parent = trie->parent;
+    if (trie->parent != NULL && trie->equals == NULL &&
+        ((trie->right == NULL && trie->left != NULL) || (trie->left == NULL && trie->right != NULL))) {
+        // De top heeft enkel een rechter- of linkerkind dus de kinderen van dat kind moeten de kinderen van de top worden
+        TernaryTrie* child = trie->left;
+        if (child == NULL) {
+            child = trie->right;
+        }
+        if (parent->equals == trie) {
+            parent->equals = child;
+        } else if (parent->left == trie) {
+            parent->left = child;
+        } else {
+            parent->right = child;
+        }
+        child->parent = parent;
+        trie->right = NULL;
+        trie->left = NULL;
+        free(trie);
+        trie = child;
+    }
+
+    while (trie->parent != NULL && trie->left == NULL && trie->right == NULL) {
+        // zolang er lege toppen zijn of totdat de top de wortel is, worden deze verwijderd
+        parent = trie->parent;
         if (parent->right == trie) {
             parent->right = NULL;
         } else if (parent->left == trie) {
             parent->left = NULL;
         } else {
             parent->equals = NULL;
+        }
+        if (trie->equals != NULL) {
+            TernaryTrie* equals = trie->equals;
+            trie->equals = NULL,
+            parent->equals = equals;
+            equals->parent = parent;
         }
         if (trie->string != NULL) {
             free(trie->string);

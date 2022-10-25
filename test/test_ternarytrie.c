@@ -1,5 +1,5 @@
 #include "test.h"
-#include "ternarytrie.h"
+#include "../include/ternarytrie.h"
 
 #define TEST_SIZE(ct, size) \
     TEST_CHECK(ternarytrie_size(ct) == size); \
@@ -170,6 +170,34 @@ void test_remove_not_present() {
     ternarytrie_free(ct);
 }
 
+// Hierbij heeft de boom een lang pad naar 2 bladeren, waarbij het pad geen extra vertakkingen heeft.
+// Deze bladeren worden verwijderd.
+void test_remove_far_leafs() {
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* twentyone = "twentyone";
+    const char* twentytwo = "twentytwo";
+
+    TEST_CHECK(ternarytrie_add(ct, twentyone));
+    TEST_CHECK(ternarytrie_add(ct, twentytwo));
+
+    TEST_SIZE(ct, 2);
+
+    TEST_CHECK(ternarytrie_search(ct, twentyone));
+    TEST_CHECK(ternarytrie_search(ct, twentytwo));
+
+    TEST_CHECK(ternarytrie_remove(ct, twentyone));
+    TEST_CHECK(!ternarytrie_search(ct, twentyone));
+    TEST_CHECK(ternarytrie_search(ct, twentytwo));
+    TEST_SIZE(ct, 1);
+
+    TEST_CHECK(ternarytrie_remove(ct, twentytwo));
+    TEST_CHECK(!ternarytrie_search(ct, twentytwo));
+    TEST_SIZE(ct, 0);
+
+}
+
 TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
@@ -180,5 +208,6 @@ TEST_LIST = {
         { "ternarytrie remove one",test_remove_one },
         { "ternarytrie remove more",test_remove_more },
         { "ternarytrie remove not present",test_remove_not_present},
+        { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
 };
