@@ -17,7 +17,9 @@ TernaryTrie* ternarytrie_init() {
 }
 
 void ternarytrie_free(TernaryTrie* trie) {
-    free(trie->string);
+    if (trie->string != NULL) {
+        free(trie->string);
+    }
     TernaryTrie* left = trie->left;
     TernaryTrie* right = trie->right;
     TernaryTrie* equals = trie->equals;

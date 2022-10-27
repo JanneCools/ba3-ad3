@@ -61,6 +61,33 @@ void test_add_more() {
     customtrie_free(ct);
 }
 
+// Hierbij wordt een extra woord "twenz" toegevoegd.
+// De skip ("nty") van de top die naar "twenty" en "twentytwo" gaat, moet hierdoor aangepast worden
+// naar een kortere skip ("n"). In deze test wordt nagekeken of dit correct verlopen is.
+void test_add_string_smaller_than_skip_length() {
+    CustomTrie* ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+    const char* one = "one";
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentytwo = "twentytwo";
+    const char* twenz = "twenz";
+
+    TEST_CHECK(customtrie_add(ct, one));
+    TEST_CHECK(customtrie_add(ct, two));
+    TEST_CHECK(customtrie_add(ct, twenty));
+    TEST_CHECK(customtrie_add(ct, twentytwo));
+    TEST_CHECK(customtrie_add(ct, twenz));
+
+    TEST_SIZE(ct, 5);
+
+    TEST_CHECK(customtrie_search(ct, one));
+    TEST_CHECK(customtrie_search(ct, two));
+    TEST_CHECK(customtrie_search(ct, twenty));
+    TEST_CHECK(customtrie_search(ct, twentytwo));
+    TEST_CHECK(customtrie_search(ct, twenz));
+}
+
 void test_remove_one() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
@@ -114,6 +141,7 @@ TEST_LIST = {
         {"customtrie init",test_init },
         { "customtrie add one",test_add_one },
         { "customtrie add more",test_add_more },
+        { "customtrie add string smaller than skip length",test_add_string_smaller_than_skip_length},
         { "customtrie search not present",test_search_not_present},
 
         { "customtrie remove one",test_remove_one },
