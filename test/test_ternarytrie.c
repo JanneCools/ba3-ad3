@@ -170,7 +170,7 @@ void test_remove_not_present() {
     ternarytrie_free(ct);
 }
 
-// Hier wordt de string "twenty" voor de string "two" verwijderd. Hiermee wordt gecontroleerd dat het pad tussen "two"
+// Hier wordt de string "twenty" verwijderd. Hiermee wordt gecontroleerd dat het pad tussen "two"
 // en "twentytwo" zonder problemen terug verkort wordt. Dit pad was immers enkel nodig als "twenty" ook nog in de boom zat.
 void test_remove_twenty() {
     TernaryTrie* ct = ternarytrie_init();
@@ -192,6 +192,34 @@ void test_remove_twenty() {
 
     TEST_CHECK(!ternarytrie_search(ct, twenty));
     TEST_CHECK(ternarytrie_search(ct,twentytwo));
+
+    TEST_SIZE(ct, 2);
+
+    ternarytrie_free(ct);
+}
+
+// Hier wordt de string "twentytwo" verwijderd. Hiermee wordt gecontroleerd dat het pad tussen "two"
+// en "twenty" zonder problemen terug verkort wordt. Dit pad was immers enkel nodig als "twenty" ook nog in de boom zat.
+void test_remove_twentytwo() {
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* one = "one";
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentytwo = "twentytwo";
+    TEST_CHECK(ternarytrie_add(ct, one));
+    TEST_CHECK(ternarytrie_add(ct, two));
+    TEST_CHECK(ternarytrie_add(ct, twenty));
+    TEST_CHECK(ternarytrie_add(ct, twentytwo));
+
+    TEST_SIZE(ct, 4);
+
+    TEST_CHECK(ternarytrie_remove(ct, one));
+    TEST_CHECK(ternarytrie_remove(ct, twentytwo));
+
+    TEST_CHECK(ternarytrie_search(ct, twenty));
+    TEST_CHECK(!ternarytrie_search(ct,twentytwo));
 
     TEST_SIZE(ct, 2);
 
@@ -237,11 +265,12 @@ TEST_LIST = {
         { "ternarytrie remove more",test_remove_more },
         { "ternarytrie remove not present",test_remove_not_present},
         { "ternarytrie remove twenty",test_remove_twenty },
+        { "ternarytrie remove twentytwo",test_remove_twentytwo },
         { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
 };
 
 /*TEST_LIST = {
-        { "ternarytrie remove twenty",test_remove_twenty },
+        { "ternarytrie remove twentytwo",test_remove_twentytwo },
         { NULL, NULL}
 };*/

@@ -214,9 +214,23 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
     while (! finished) {
         if (trie->equals == NULL) {
             if (trie->left == NULL && trie->right == NULL) {
-                // de top is de wortel dus het karakter wordt omgezet naar '\0'
-                trie->character = '\0';
-                finished = true;
+                if (trie->parent == NULL) {
+                    // de top is de wortel dus het karakter wordt omgezet naar '\0'
+                    trie->character = '\0';
+                    finished = true;
+                } else {
+                    TernaryTrie* child = trie;
+                    trie = trie->parent;
+                    if (trie->left == child) {
+                        trie->left = NULL;
+                    } else if (trie->right == child) {
+                        trie->right = NULL;
+                    } else {
+                        trie->equals = NULL;
+                    }
+                    child->parent = NULL;
+                    ternarytrie_free(child);
+                }
             } else {
                 rearrange_trie(trie);
             }
