@@ -226,6 +226,33 @@ void test_remove_twentytwo() {
     ternarytrie_free(ct);
 }
 
+// Hier worden de string "two", "twenty", "twentyfour" en "twentyseven" toegevoegd. Dan wordt "twentyseven" verwijderd.
+void test_remove_twentyseven() {
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentyfour = "twentyfour";
+    const char* twentyseven = "twentyseven";
+    TEST_CHECK(ternarytrie_add(ct, two));
+    TEST_CHECK(ternarytrie_add(ct, twenty));
+    TEST_CHECK(ternarytrie_add(ct, twentyfour));
+    TEST_CHECK(ternarytrie_add(ct, twentyseven));
+
+    TEST_SIZE(ct, 4);
+
+    TEST_CHECK(ternarytrie_remove(ct, twentyseven));
+
+    TEST_CHECK(ternarytrie_search(ct, twenty));
+    TEST_CHECK(ternarytrie_search(ct,twentyfour));
+    TEST_CHECK(!ternarytrie_search(ct, twentyseven));
+
+    TEST_SIZE(ct, 3);
+
+    ternarytrie_free(ct);
+}
+
 // Hierbij heeft de boom een lang pad naar 2 bladeren, waarbij het pad geen extra vertakkingen heeft.
 // Deze bladeren worden verwijderd.
 void test_remove_far_leafs() {
@@ -266,11 +293,12 @@ TEST_LIST = {
         { "ternarytrie remove not present",test_remove_not_present},
         { "ternarytrie remove twenty",test_remove_twenty },
         { "ternarytrie remove twentytwo",test_remove_twentytwo },
+        { "ternarytrie remove twentyseven",test_remove_twentyseven },
         { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
 };
 
 /*TEST_LIST = {
-        { "ternarytrie remove twentytwo",test_remove_twentytwo },
+        { "ternarytrie remove twentyseven",test_remove_twentyseven },
         { NULL, NULL}
 };*/

@@ -61,6 +61,7 @@ bool customtrie_search(CustomTrie* trie, const char* string) {
 
 bool customtrie_add(CustomTrie* trie, const char* string) {
     if (customtrie_search(trie, string)) {
+        // de string zit al in de boom
         return false;
     }
     if (trie->character == '\0') {
@@ -139,6 +140,7 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         node1->equals = trie;
         node1->parent = parent;
         parent->equals = node1;
+        trie->parent = node1;
         CustomTrie* node2 = calloc(1, sizeof(CustomTrie));  // ouder van nieuwe string
         node2->character = string[index+mutual_skip];
         node2->skip = calloc(1, sizeof(char));
@@ -209,7 +211,143 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
 }
 
 bool customtrie_remove(CustomTrie* trie, const char* string) {
-    return trie != NULL && strcmp(trie->string, string) == 0;
+    if (!customtrie_search(trie, string)) {
+        return false;
+    }
+    bool searching = true;
+    int index = 0;
+    CustomTrie* leaf = trie;
+    while (searching) {
+        if (leaf == NULL || leaf->string != NULL) {
+            // we zitten in een NULL-pointer of een blad
+            searching = false;
+        } else if (string[index] < leaf->character) {
+            leaf = leaf->left;
+        } else if (string[index] > leaf->character) {
+            leaf = leaf->right;
+        } else {
+            size_t skip_length = strlen(leaf->skip);
+            // het deel van de string dat geskipt wordt bepalen
+            char* skip_string = malloc((skip_length+1)*sizeof(char));
+            memcpy(skip_string, &string[index+1], skip_length);
+            skip_string[skip_length] = '\0';
+            if (strlen(string)-index-1 < skip_length || strcmp(skip_string, leaf->skip) != 0) {
+                // de skips zijn niet gelijk dus hier gaan we moeten splitsen
+                index ++;
+                searching = false;
+            } else {
+                index += (int)skip_length + 1;
+                leaf = leaf->equals;
+            }
+        }
+    }
+    trie = leaf->parent;
+    trie->equals = NULL;
+    customtrie_free(leaf);
+    bool rearranging = true;
+    while (rearranging) {
+        if (trie->equals == NULL) {
+            if (trie->left == NULL && trie->right == NULL) {
+                if (trie->parent == NULL) {
+                    // de top is de wortel dus het karakter moet omgezet worden naar '\0'
+                    trie->character = '\0';
+                    rearranging = false;
+                } else {
+                    CustomTrie* child = trie;
+                    trie = trie->parent;
+                    if (trie->left == child) {
+                        trie->left = NULL;
+                    } else if (trie->right == child) {
+                        trie->right = NULL;
+                    } else {
+                        trie->equals = NULL;
+                    }
+                    child->parent = NULL;
+                    customtrie_free(child);
+                }
+            } else {
+                if (trie->left != NULL) {
+                    CustomTrie* right = trie->right;
+                    CustomTrie* left = trie->left;
+                    trie->character = left->character;
+                    trie->left = left->left;
+                    trie->right = left->right;
+                    trie->equals = left->equals;
+                    trie->skip = left->skip;
+                    if (left->left != NULL) {
+                        left->left->parent = trie;
+                    }
+                    if (left->right != NULL) {
+                        left->right->parent = trie;
+                    }
+                    left->equals->parent = trie;
+                    left->left = NULL;
+                    left->right = NULL;
+                    left->equals = NULL;
+                    left->parent = NULL;
+                    left->skip = NULL;
+                    free(left);
+                    if (right != NULL) {
+                        CustomTrie* newRight = right;
+                        while (newRight->right != NULL) {
+                            newRight = newRight->right;
+                        }
+                        newRight->right = right;
+                        right->parent = newRight;
+                    }
+                } else if (trie->right != NULL) {
+                    CustomTrie* right = trie->right;
+                    trie->character = right->character;
+                    trie->left = right->left;
+                    trie->right = right->right;
+                    trie->equals = right->equals;
+                    trie->skip = right->skip;
+                    if (right->left != NULL) {
+                        right->left->parent = trie;
+                    }
+                    if (right->right != NULL) {
+                        right->right->parent = trie;
+                    }
+                    right->equals->parent = trie;
+                    right->left = NULL;
+                    right->right = NULL;
+                    right->equals = NULL;
+                    right->parent = NULL;
+                    right->skip = NULL;
+                    free(right);
+                }
+            }
+        } else if (trie->parent == NULL) {
+            rearranging = false;    // we zitten in de wortel
+        } else if (trie->parent->equals == trie && trie->left == NULL && trie->right == NULL) {
+            // de top heeft enkel een blad als kind en is het equals-kind van zijn ouder
+            // dus de skip van de ouder mag verwijderd worden en de huidige top mag ook verwijderd worden
+            CustomTrie* parent = trie->parent;
+            size_t skip_length = strlen(parent->skip) + strlen(trie->skip) + 2;
+            char* skip = malloc(skip_length * sizeof(char));
+            char character[2] = {trie->character, '\0'};
+            strcpy(skip, parent->skip);
+            strcat(skip, character);
+            strcat(skip, trie->skip);
+            skip[skip_length - 1] = '\0';
+            free(parent->skip);
+            parent->skip = skip;
+            CustomTrie* child = trie->equals;
+            child->parent = parent;
+            parent->equals = child;
+            trie->parent = NULL;
+            trie->equals = NULL;
+            customtrie_free(trie);
+            trie = parent;
+            rearranging = false;
+        }
+    }
+    // als we in de wortel geëindigd zijn en de wortel geen kinderen heeft, dan moet de skip van de wortel '\0' zijn
+    if (trie->parent == NULL && trie->left == NULL && trie->right == NULL && trie->equals == NULL) {
+        trie->skip = realloc(trie->skip, sizeof(char));
+        trie->skip[0] = '\0';
+    }
+    return true;
 }
 
 size_t customtrie_size(CustomTrie* trie) {

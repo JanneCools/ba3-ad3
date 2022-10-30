@@ -96,6 +96,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
         } else {
             parent->left = trie;
         }
+        trie->parent = parent;
         TernaryTrie* leaf = calloc(1, sizeof(TernaryTrie));
         leaf->string = malloc((strlen(string)+1) * sizeof(char));
         strcpy(leaf->string, string);
