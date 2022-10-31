@@ -1,70 +1,41 @@
 #include <malloc.h>
 #include "../include/ternarytrie.h"
+#include "binarynode.c"
 #include "string.h"
 
 typedef struct ttrie {
-    char character;
-    char* string;
-    TernaryTrie* left;
-    TernaryTrie* right;
-    TernaryTrie* equals;
-    TernaryTrie* parent;
+    BinaryNode* root;
+    size_t size;
 } TernaryTrie;
 
 TernaryTrie* ternarytrie_init() {
     TernaryTrie* trie = calloc(1, sizeof(TernaryTrie));
+    trie->root = binarynode_init(false);
     return trie;
 }
 
 void ternarytrie_free(TernaryTrie* trie) {
-    if (trie->string != NULL) {
-        free(trie->string);
-    }
-    TernaryTrie* left = trie->left;
-    TernaryTrie* right = trie->right;
-    TernaryTrie* equals = trie->equals;
-    if (trie->left != NULL) {
-        trie->left = NULL;
-        left->parent = NULL;
-        ternarytrie_free(left);
-    }
-    if (trie->right != NULL) {
-        trie->right = NULL;
-        right->parent = NULL;
-        ternarytrie_free(right);
-    }
-    if (trie->equals != NULL) {
-        trie->equals = NULL;
-        equals->parent = NULL;
-        ternarytrie_free(equals);
-    }
+    binarynode_free(trie->root);
+    trie->root = NULL;
     free(trie);
 }
 
 bool ternarytrie_search(TernaryTrie* trie, const char* string) {
-    int index = 0;
-    while (trie != NULL && trie->string == NULL) {
-        if (string[index] < trie->character) {
-            trie = trie->left;
-        } else if (string[index] > trie->character) {
-            trie = trie->right;
-        } else {
-            trie = trie->equals;
-            index ++;
-        }
-    }
-    return trie != NULL && strcmp(trie->string, string) == 0;
+    return binarynode_search(trie->root, string);
 }
 
 bool ternarytrie_add(TernaryTrie* trie, const char* string) {
-    if (trie->character == '\0') {
+    BinaryNode* node = trie->root;
+    if (node->character == '\0') {
         // de boom is nog volledig leeg
-        trie->character = string[0];
-        TernaryTrie* leaf = calloc(1, sizeof(TernaryTrie));
+        node->character = string[0];
+        //BinaryNode* leaf = calloc(1, sizeof(TernaryTrie));
+        BinaryNode* leaf = binarynode_init(false);
         leaf->string = calloc(strlen(string),sizeof(char));
         strcpy(leaf->string, string);
-        leaf->parent =trie;
-        trie->equals = leaf;
+        leaf->parent = node;
+        node->equals = leaf;
+        trie->size ++;
         return true;
     }
     if (ternarytrie_search(trie, string)) {
@@ -72,114 +43,118 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     }
     bool trie_changed = false;
     size_t index = 0;
-    TernaryTrie* parent = trie;
+    BinaryNode* parent = node;
     // de while-lus wordt uitgevoerd uit zolang we geen NULL-pointer of blad tegenkomen
-    while (trie != NULL && trie->string == NULL) {
-        if (string[index] < trie->character) {
-            parent = trie;
-            trie = trie->left;
-        } else if (string[index] > trie->character) {
-            parent = trie;
-            trie = trie->right;
+    while (node != NULL && node->string == NULL) {
+        if (string[index] < node->character) {
+            parent = node;
+            node = node->left;
+        } else if (string[index] > node->character) {
+            parent = node;
+            node = node->right;
         } else {
-            parent = trie;
-            trie = trie->equals;
+            parent = node;
+            node = node->equals;
             index ++;
         }
     }
-    if (trie == NULL) {
+    if (node == NULL) {
         // hier nieuwe top aanmaken
-        trie = (TernaryTrie*) calloc(1, sizeof(TernaryTrie));
-        trie->character = string[index];
-        if (trie->character > parent->character) {
-            parent->right = trie;
+        //node = (BinaryNode*) calloc(1, sizeof(TernaryTrie));
+        node = binarynode_init(false);
+        node->character = string[index];
+        if (node->character > parent->character) {
+            parent->right = node;
         } else {
-            parent->left = trie;
+            parent->left = node;
         }
-        trie->parent = parent;
-        TernaryTrie* leaf = calloc(1, sizeof(TernaryTrie));
+        node->parent = parent;
+        BinaryNode* leaf = binarynode_init(false);
         leaf->string = malloc((strlen(string)+1) * sizeof(char));
         strcpy(leaf->string, string);
-        leaf->parent = trie;
-        trie->equals = leaf;
+        leaf->parent = node;
+        node->equals = leaf;
         trie_changed = true;
-    } else if (strcmp(trie->string, string) == 0) {
+    } else if (strcmp(node->string, string) == 0) {
         trie_changed = false;
     } else {
-        TernaryTrie* node;
-        while (string[index] == trie->string[index]) {
-            node = calloc(1, sizeof(TernaryTrie));
-            node->character = string[index];
-            parent->equals = node;
-            node->parent = parent;
-            parent = node;
+        BinaryNode* binaryNode;
+        while (string[index] == node->string[index]) {
+            binaryNode = binarynode_init(false);
+            binaryNode->character = string[index];
+            parent->equals = binaryNode;
+            binaryNode->parent = parent;
+            parent = binaryNode;
             index ++;
         }
-        node = calloc(1, sizeof(TernaryTrie));
-        TernaryTrie* child = calloc(1, sizeof(TernaryTrie));
-        TernaryTrie* newleaf = calloc(1, sizeof(TernaryTrie));
-        node->character = trie->string[index];
+        binaryNode = binarynode_init(false);
+        BinaryNode* child = binarynode_init(false);
+        BinaryNode* newleaf = binarynode_init(false);
+        binaryNode->character = node->string[index];
         child->character = string[index];
         newleaf->string = malloc((strlen(string)+1)*sizeof(char));
         strcpy(newleaf->string, string);
-        if (child->character < node->character) {
-            node->left = child;
+        if (child->character < binaryNode->character) {
+            binaryNode->left = child;
         } else {
-            node->right = child;
+            binaryNode->right = child;
         }
-        node->equals = trie;
+        binaryNode->equals = node;
         child->equals = newleaf;
-        parent->equals = node;
-        child->parent = node;
-        trie->parent = node;
+        parent->equals = binaryNode;
+        child->parent = binaryNode;
+        node->parent = binaryNode;
         newleaf->parent = child;
-        node->parent = parent;
+        binaryNode->parent = parent;
         trie_changed = true;
+    }
+    if (trie_changed) {
+        trie->size ++;
     }
     return trie_changed;
 }
 
-void rearrange_trie(TernaryTrie* trie) {
-    if (trie->left != NULL) {
-        TernaryTrie* right = trie->right;
-        TernaryTrie* left = trie->left;
-        trie->character = left->character;
-        trie->left = left->left;
-        trie->right = left->right;
-        trie->equals = left->equals;
+void rearrange_trie(BinaryNode* node) {
+    if (node->left != NULL) {
+        BinaryNode* right = node->right;
+        BinaryNode* left = node->left;
+        node->character = left->character;
+        node->left = left->left;
+        node->right = left->right;
+        node->equals = left->equals;
         if (left->left != NULL) {
-            left->left->parent = trie;
+            left->left->parent = node;
         }
         if (left->right != NULL) {
-            left->right->parent = trie;
+            left->right->parent = node;
         }
-        left->equals->parent = trie;
+        left->equals->parent = node;
         left->left = NULL;
         left->right = NULL;
         left->equals = NULL;
         left->parent = NULL;
         free(left);
         if (right != NULL) {
-            TernaryTrie* newRight = right;
+            BinaryNode* newRight = right;
             while (newRight->right != NULL) {
                 newRight = newRight->right;
             }
             newRight->right = right;
             right->parent = newRight;
         }
-    } else if (trie->right != NULL) {
-        TernaryTrie* right = trie->right;
-        trie->character = right->character;
-        trie->left = right->left;
-        trie->right = right->right;
-        trie->equals = right->equals;
+    } else if (node->right != NULL) {
+        BinaryNode* right = node->right;
+        node->character = right->character;
+        node->left = right->left;
+        node->right = right->right;
+        node->equals = right->equals;
         if (right->left != NULL) {
-            right->left->parent = trie;
+            right->left->parent = node;
         }
         if (right->right != NULL) {
-            right->right->parent = trie;
+            right->right->parent = node;
         }
-        right->equals->parent = trie;
+        right->equals->parent = node;
         right->left = NULL;
         right->right = NULL;
         right->equals = NULL;
@@ -190,7 +165,7 @@ void rearrange_trie(TernaryTrie* trie) {
 
 bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
     // de string zoeken in de boom
-    TernaryTrie* leaf = trie;
+    BinaryNode* leaf = trie->root;
     int index = 0;
     while (leaf != NULL && leaf->string == NULL) {
         if (string[index] < leaf->character) {
@@ -206,86 +181,74 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
         return false; // de string zit niet in de boom
     }
     free(leaf->string);
-    trie = leaf->parent;
+    BinaryNode* node = leaf->parent;
     leaf->parent = NULL;
-    trie->equals = NULL;
+    node->equals = NULL;
     free(leaf);
     //TernaryTrie* parent = trie->parent;
     bool finished = false;
     while (! finished) {
-        if (trie->equals == NULL) {
-            if (trie->left == NULL && trie->right == NULL) {
-                if (trie->parent == NULL) {
+        if (node->equals == NULL) {
+            if (node->left == NULL && node->right == NULL) {
+                if (node->parent == NULL) {
                     // de top is de wortel dus het karakter wordt omgezet naar '\0'
-                    trie->character = '\0';
+                    node->character = '\0';
                     finished = true;
                 } else {
-                    TernaryTrie* child = trie;
-                    trie = trie->parent;
-                    if (trie->left == child) {
-                        trie->left = NULL;
-                    } else if (trie->right == child) {
-                        trie->right = NULL;
+                    BinaryNode* child = node;
+                    node = node->parent;
+                    if (node->left == child) {
+                        node->left = NULL;
+                    } else if (node->right == child) {
+                        node->right = NULL;
                     } else {
-                        trie->equals = NULL;
+                        node->equals = NULL;
                     }
                     child->parent = NULL;
-                    ternarytrie_free(child);
+                    binarynode_free(child);
                 }
             } else {
-                rearrange_trie(trie);
+                rearrange_trie(node);
             }
-        } else if (trie->equals != NULL && trie->equals->string == NULL) {
+        } else if (node->equals != NULL && node->equals->string == NULL) {
             finished = true;
-        } else if (trie->equals != NULL && trie->equals->string != NULL && trie->left == NULL && trie->right == NULL) {
+        } else if (node->equals != NULL && node->equals->string != NULL && node->left == NULL && node->right == NULL) {
             // de top heeft enkel een vertakking via equals naar een blad
             // dus het pad van de wortel naar deze top kan eventueel verkort worden
-            while (trie->parent != NULL && trie->parent->equals == trie && trie->left == NULL && trie->right == NULL) {
-                TernaryTrie* parent = trie->parent;
-                if (parent->right == trie) {
+            while (node->parent != NULL && node->parent->equals == node && node->left == NULL && node->right == NULL) {
+                BinaryNode* parent = node->parent;
+                if (parent->right == node) {
                     parent->right = NULL;
-                } else if (parent->left == trie) {
+                } else if (parent->left == node) {
                     parent->left = NULL;
                 } else {
                     parent->equals = NULL;
                 }
-                if (trie->equals != NULL) {
-                    TernaryTrie* equals = trie->equals;
-                    trie->equals = NULL;
+                if (node->equals != NULL) {
+                    BinaryNode* equals = node->equals;
+                    node->equals = NULL;
                     parent->equals = equals;
                     equals->parent = parent;
                 }
-                if (trie->string != NULL) {
-                    free(trie->string);
+                if (node->string != NULL) {
+                    free(node->string);
                 }
-                free(trie);
-                trie = parent;
+                free(node);
+                node = parent;
             }
-            finished = true;    //TODO: nakijken of dit klopt
+            finished = true;
         } else {
-            finished = true;    //TODO: nakijken of dit klopt
+            finished = true;
         }
     }
-    if (trie->parent == NULL) {
-        rearrange_trie(trie);
+    if (node->parent == NULL) {
+        rearrange_trie(node);
     }
+    trie->size --;
     return true;
 }
 
 
 size_t ternarytrie_size(TernaryTrie* trie) {
-    size_t size = 0;
-    if (trie->left != NULL) {
-        size += ternarytrie_size(trie->left);
-    }
-    if (trie->right != NULL) {
-        size += ternarytrie_size(trie->right);
-    }
-    if (trie->equals != NULL) {
-        size += ternarytrie_size(trie->equals);
-    }
-    if (trie->string != NULL) {
-        size ++;
-    }
-    return size;
+    return trie->size;
 }

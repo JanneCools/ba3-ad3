@@ -11,7 +11,7 @@ add_library(arraytrie SHARED include/arraytrie.h src/arraytrie.c)
 add_library(ternarytrie SHARED include/ternarytrie.h src/ternarytrie.c)
 add_library(customtrie SHARED include/customtrie.h src/customtrie.c)
 
-add_executable(test_array test/test_arraytrie.c)
+add_executable(test_array test/test_arraytrie.c src/binarynode.c)
 target_link_libraries(test_array PUBLIC arraytrie)
 
 add_executable(test_ternary test/test_ternarytrie.c)
