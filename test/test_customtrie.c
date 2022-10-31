@@ -181,6 +181,88 @@ void test_remove_different_order() {
     customtrie_free(ct);
 }
 
+// Bij de volgende 3 testen hebben 3 strings dezelfde deelstring ("twenty").
+// In elke test wordt 1 van die 3 strings verwijderd. Hier wordt de verste vertakking ("twentyseven") verwijderd.
+void test_remove_twentyseven() {
+    CustomTrie * ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentyfour = "twentyfour";
+    const char* twentyseven = "twentyseven";
+    TEST_CHECK(customtrie_add(ct, two));
+    TEST_CHECK(customtrie_add(ct, twenty));
+    TEST_CHECK(customtrie_add(ct, twentyfour));
+    TEST_CHECK(customtrie_add(ct, twentyseven));
+
+    TEST_SIZE(ct, 4);
+
+    TEST_CHECK(customtrie_remove(ct, twentyseven));
+
+    TEST_CHECK(customtrie_search(ct, twenty));
+    TEST_CHECK(customtrie_search(ct,twentyfour));
+    TEST_CHECK(!customtrie_search(ct, twentyseven));
+
+    TEST_SIZE(ct, 3);
+
+    customtrie_free(ct);
+}
+
+// Hier wordt de middelste vertakking ("twentyfour") verwijderd.
+void test_remove_twentyfour() {
+    CustomTrie * ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentyfour = "twentyfour";
+    const char* twentyseven = "twentyseven";
+    TEST_CHECK(customtrie_add(ct, two));
+    TEST_CHECK(customtrie_add(ct, twenty));
+    TEST_CHECK(customtrie_add(ct, twentyfour));
+    TEST_CHECK(customtrie_add(ct, twentyseven));
+
+    TEST_SIZE(ct, 4);
+
+    TEST_CHECK(customtrie_remove(ct, twentyfour));
+
+    TEST_CHECK(customtrie_search(ct, twenty));
+    TEST_CHECK(customtrie_search(ct,twentyseven));
+    TEST_CHECK(!customtrie_search(ct, twentyfour));
+
+    TEST_SIZE(ct, 3);
+
+    customtrie_free(ct);
+}
+
+// Hier wordt de middelste vertakking ("twenty") verwijderd.
+void test_remove_twenty() {
+    CustomTrie * ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* two = "two";
+    const char* twenty = "twenty";
+    const char* twentyfour = "twentyfour";
+    const char* twentyseven = "twentyseven";
+    TEST_CHECK(customtrie_add(ct, two));
+    TEST_CHECK(customtrie_add(ct, twenty));
+    TEST_CHECK(customtrie_add(ct, twentyfour));
+    TEST_CHECK(customtrie_add(ct, twentyseven));
+
+    TEST_SIZE(ct, 4);
+
+    TEST_CHECK(customtrie_remove(ct, twenty));
+
+    TEST_CHECK(!customtrie_search(ct, twenty));
+    TEST_CHECK(customtrie_search(ct,twentyfour));
+    TEST_CHECK(customtrie_search(ct, twentyseven));
+
+    TEST_SIZE(ct, 3);
+
+    customtrie_free(ct);
+}
+
 void test_remove_not_present() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
@@ -191,7 +273,7 @@ void test_remove_not_present() {
     customtrie_free(ct);
 }
 
-/*TEST_LIST = {
+TEST_LIST = {
         {"customtrie init",test_init },
         { "customtrie add one",test_add_one },
         { "customtrie add more",test_add_more },
@@ -202,11 +284,16 @@ void test_remove_not_present() {
         { "customtrie remove one",test_remove_one },
         { "customtrie remove more",test_remove_more },
         { "customtrie remove different order",test_remove_different_order },
+        { "customtrie remove twentyseven",test_remove_twentyseven },
+        { "customtrie remove twentyfour",test_remove_twentyfour },
+        { "customtrie remove twenty",test_remove_twenty },
         { "customtrie remove not present",test_remove_not_present},
         { NULL, NULL}
-};*/
-
-TEST_LIST = {
-        { "customtrie remove different order",test_remove_different_order },
-        { NULL, NULL}
 };
+
+/*TEST_LIST = {
+        { "customtrie remove twentyseven",test_remove_twentyseven },
+        { "customtrie remove twentyfour",test_remove_twentyfour },
+        { "customtrie remove twenty",test_remove_twenty },
+        { NULL, NULL}
+};*/

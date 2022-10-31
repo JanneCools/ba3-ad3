@@ -18,7 +18,9 @@ ArrayTrie* arraytrie_init() {
 }
 
 void arraytrie_free(ArrayTrie* trie) {
-    free(trie->string);
+    if (trie->string != NULL) {
+        free(trie->string);
+    }
     free(trie->skip);
     ArrayTrie** children = (ArrayTrie **) trie->children;
     trie->children = NULL;
@@ -238,8 +240,7 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                         trie->children[trie->children_size-1] = NULL;
                         trie->children_size --;
                         trie->children = realloc(trie->children, trie->children_size);
-                        free(leaf->string);
-                        free(leaf);
+                        arraytrie_free(leaf);
                         finished = true;
                         removed = true;
                     } else if (trie->children_size == 1) {
@@ -250,8 +251,7 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                         trie->children_size = 0;
                         trie->children = NULL;
                         children[0] = NULL;
-                        free(leaf->string);
-                        free(leaf);
+                        arraytrie_free(leaf);
                         free(children);
                         finished = true;
                         removed = true;
@@ -273,14 +273,16 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                         strcat(skip, character);
                         strcat(skip, child->skip);
                         skip[strlen(trie->skip) + strlen(child->skip)+1] = '\0';
+                        free(trie->skip);
                         trie->skip = skip;
                         ArrayTrie** children = child->children;
                         child->children = NULL;
                         if (child->string == NULL) {
-                            free(trie->children);       //TODO nakijken of dit klopt
+                            free(trie->children);
                             trie->children = children;
                             trie->children_size = child->children_size;
-                            free(child);
+                            child->children_size = 0;
+                            arraytrie_free(child);
                         } else if (trie == root) {
                             free(children);
                             trie->children = realloc(trie->children, sizeof(ArrayTrie*));
@@ -293,7 +295,8 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                             free(trie->children);
                             trie->children = NULL;
                             trie->string = child->string;
-                            free(child);
+                            child->string = NULL;
+                            arraytrie_free(child);
                         }
                         finished = true;
                         removed = true;

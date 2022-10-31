@@ -1,7 +1,6 @@
 #include <malloc.h>
 #include "../include/customtrie.h"
 #include "string.h"
-#include "stdio.h"
 
 typedef struct ctrie {
     char character;
@@ -85,8 +84,10 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
             // we zitten in een NULL-pointer of een blad (met een andere string want we hebben al nagekeken of de string in de boom zit)
             searching = false;
         } else if (string[index] < trie->character) {
+            parent = trie;
             trie = trie->left;
         } else if (string[index] > trie->character) {
+            parent = trie;
             trie = trie->right;
         } else {
             size_t skip_length = strlen(trie->skip);
@@ -341,6 +342,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
             trie = parent;
             rearranging = false;
         }
+        rearranging = false;
     }
     // als we in de wortel geëindigd zijn en de wortel geen kinderen heeft, dan moet de skip van de wortel '\0' zijn
     if (trie->parent == NULL && trie->left == NULL && trie->right == NULL && trie->equals == NULL) {
