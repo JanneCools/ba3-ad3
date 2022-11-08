@@ -29,19 +29,18 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         // de string zit al in de boom
         return false;
     }
-    BinaryNode* node = trie->root;
-    if (node->character == '\0') {
+    if (trie->size == 0) {
         // de boom is nog volledig leeg
-        node->character = string[0];
-        node->skip = calloc(1, sizeof(char));
+        trie->root->character = string[0];
         BinaryNode* leaf = binarynode_init(true);
-        leaf->string = calloc(strlen(string),sizeof(char));
+        leaf->string = calloc(strlen(string)+1,sizeof(char));
         strcpy(leaf->string, string);
-        leaf->parent = node;
-        node->equals = leaf;
+        leaf->parent = trie->root;
+        trie->root->equals = leaf;
         trie->size ++;
         return true;
     }
+    BinaryNode* node = trie->root;
     bool searching = true;
     int index = 0;
     // zoeken tot de skips niet gelijk zijn of tot een NULL-pointer bereikt wordt (door left of right te volgen naar NULL)
@@ -59,9 +58,8 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         } else {
             size_t skip_length = strlen(node->skip);
             // het deel van de string dat geskipt wordt, bepalen
-            char* skip_string = malloc((skip_length+1)*sizeof(char));
-            memcpy(skip_string, &string[index+1], skip_length);
-            skip_string[skip_length] = '\0';
+            char* skip_string = calloc(skip_length+1, sizeof(char));
+            strncpy(skip_string, &string[index+1], skip_length);
             if (strlen(string)-index-1 < skip_length || strcmp(skip_string, node->skip) != 0) {
                 // de skips zijn niet gelijk dus hier gaan we moeten splitsen
                 parent = node->parent;
@@ -72,6 +70,7 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
                 parent = node;
                 node = node->equals;
             }
+            free(skip_string);
         }
     }
     if (node == NULL) {
@@ -80,7 +79,7 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         BinaryNode* binaryNode = binarynode_init(true);
         binaryNode->character = string[index];
         BinaryNode* leaf = binarynode_init(true);
-        leaf->string = malloc((strlen(string)+1) * sizeof(char));
+        leaf->string = calloc(strlen(string)+1, sizeof(char));
         strcpy(leaf->string, string);
         if (binaryNode->character < node->character) {
             node->left = binaryNode;
@@ -97,8 +96,8 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
                && string[index+mutual_skip] == node->string[index+mutual_skip]) {
             mutual_skip ++;
         }
-        parent->skip = malloc((mutual_skip+1) * sizeof(char));
-        strcpy(parent->skip, &string[index]);
+        parent->skip = realloc(parent->skip, (mutual_skip+1)* sizeof(char));
+        strncpy(parent->skip, &string[index], mutual_skip);
         parent->skip[mutual_skip] = '\0';
         BinaryNode* node1 = binarynode_init(true);  // ouder van string dat al in boom zat
         node1->character = node->string[index+mutual_skip];
@@ -115,7 +114,7 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         }
         node2->parent = node1;
         BinaryNode* leaf = binarynode_init(true);         // blad met nieuwe string
-        leaf->string = malloc((strlen(string)+1) * sizeof(char));
+        leaf->string = calloc(strlen(string)+1, sizeof(char));
         strcpy(leaf->string, string);
         leaf->parent = node2;
         node2->equals = leaf;
@@ -129,21 +128,19 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
             mutual_skip ++;
         }
         // karakter en skip van trie aanpassen
-        char* new_skip = calloc((skip_length-mutual_skip-1), sizeof(char));
-        strcpy(new_skip, &node->skip[mutual_skip+1]);
+        char* new_skip = calloc(skip_length-mutual_skip, sizeof(char));
+        strncpy(new_skip, &node->skip[mutual_skip+1], skip_length-mutual_skip-1);
         node->character = node->skip[mutual_skip];
-        //trie->skip = realloc(trie->skip, (skip_length-mutual_skip-1) * sizeof(char));
         free(node->skip);
         node->skip = new_skip;
         // nieuwe ouder maken voor trie die het kind wordt van de ouder van trie
         BinaryNode* new_parent = binarynode_init(false);
         new_parent->character = string[index-1];
-        new_parent->skip = malloc((mutual_skip+1) * sizeof(char));
-        strcpy(new_parent->skip, &string[index]);
-        new_parent->skip[mutual_skip] = '\0';
+        new_parent->skip = calloc(mutual_skip+1, sizeof(char));
+        strncpy(new_parent->skip, &string[index], mutual_skip);
         // blad met nieuwe string maken
         BinaryNode* leaf = binarynode_init(true);
-        leaf->string = malloc((strlen(string)+1) * sizeof(char));
+        leaf->string = calloc(strlen(string)+1, sizeof(char));
         strcpy(leaf->string, string);
         // ouder van nieuw blad maken
         BinaryNode* binaryNode = binarynode_init(true);
@@ -191,7 +188,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
             size_t skip_length = strlen(leaf->skip);
             // het deel van de string dat geskipt wordt bepalen
             char* skip_string = malloc((skip_length+1)*sizeof(char));
-            memcpy(skip_string, &string[index+1], skip_length);
+            strncpy(skip_string, &string[index+1], skip_length);
             skip_string[skip_length] = '\0';
             if (strlen(string)-index-1 < skip_length || strcmp(skip_string, leaf->skip) != 0) {
                 // de skips zijn niet gelijk dus hier gaan we moeten splitsen
@@ -201,10 +198,12 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                 index += (int)skip_length + 1;
                 leaf = leaf->equals;
             }
+            free(skip_string);
         }
     }
     BinaryNode* node = leaf->parent;
     node->equals = NULL;
+    leaf->parent = NULL;
     binarynode_free(leaf);
     bool rearranging = true;
     while (rearranging) {
@@ -216,7 +215,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     rearranging = false;
                 } else {
                     BinaryNode* child = node;
-                    node = node->parent;
+                    node = child->parent;
                     if (node->left == child) {
                         node->left = NULL;
                     } else if (node->right == child) {
@@ -235,6 +234,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     node->left = left->left;
                     node->right = left->right;
                     node->equals = left->equals;
+                    free(node->skip);
                     node->skip = left->skip;
                     if (left->left != NULL) {
                         left->left->parent = node;
@@ -250,7 +250,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     left->skip = NULL;
                     free(left);
                     if (right != NULL) {
-                        BinaryNode* newRight = right;
+                        BinaryNode* newRight = node->right;
                         while (newRight->right != NULL) {
                             newRight = newRight->right;
                         }
@@ -263,6 +263,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     node->left = right->left;
                     node->right = right->right;
                     node->equals = right->equals;
+                    free(node->skip);
                     node->skip = right->skip;
                     if (right->left != NULL) {
                         right->left->parent = node;

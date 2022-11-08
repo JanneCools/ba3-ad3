@@ -3,7 +3,7 @@
 
 #define TEST_SIZE(ct, size) \
     TEST_CHECK(customtrie_size(ct) == size); \
-    TEST_MSG("Size: %llu", customtrie_size(ct))
+    TEST_MSG("Size: %zu", customtrie_size(ct))
                                 \
 void test_init() {
     CustomTrie* ct = customtrie_init();
@@ -86,6 +86,8 @@ void test_add_string_smaller_than_skip_length() {
     TEST_CHECK(customtrie_search(ct, twenty));
     TEST_CHECK(customtrie_search(ct, twentytwo));
     TEST_CHECK(customtrie_search(ct, twenz));
+
+    customtrie_free(ct);
 }
 
 // Hier wordt een string toegevoegd waardoor de skip van een top aangepast moet worden.
@@ -114,6 +116,8 @@ void test_add_string_with_different_skip_length() {
     TEST_CHECK(customtrie_search(ct, twenty));
     TEST_CHECK(customtrie_search(ct, twentytwo));
     TEST_CHECK(customtrie_search(ct, twentwo));
+
+    customtrie_free(ct);
 }
 
 void test_remove_one() {
@@ -292,8 +296,11 @@ TEST_LIST = {
 };
 
 /*TEST_LIST = {
-        { "customtrie remove twentyseven",test_remove_twentyseven },
-        { "customtrie remove twentyfour",test_remove_twentyfour },
-        { "customtrie remove twenty",test_remove_twenty },
+        //{"customtrie init",test_init },
+        { "customtrie add one",test_add_one },
+        { "customtrie add more",test_add_more },
+        { "customtrie add string smaller than skip length",test_add_string_smaller_than_skip_length},
+        { "customtrie add string with different skip length",test_add_string_with_different_skip_length},
+        { "customtrie search not present",test_search_not_present},
         { NULL, NULL}
 };*/
