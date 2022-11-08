@@ -119,6 +119,8 @@ void test_add_similar_strings() {
     TEST_CHECK(!ternarytrie_add(ct, nineteen));
     TEST_CHECK(!ternarytrie_add(ct, twenty));
     TEST_CHECK(!ternarytrie_add(ct, sevens));
+
+    ternarytrie_free(ct);
 }
 
 void test_remove_one() {
@@ -279,6 +281,7 @@ void test_remove_far_leafs() {
     TEST_CHECK(!ternarytrie_search(ct, twentytwo));
     TEST_SIZE(ct, 0);
 
+    ternarytrie_free(ct);
 }
 
 TEST_LIST = {
@@ -299,6 +302,6 @@ TEST_LIST = {
 };
 
 /*TEST_LIST = {
-        { "ternarytrie remove twentyseven",test_remove_twentyseven },
+        { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
 };*/

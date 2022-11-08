@@ -30,7 +30,7 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
         // de boom is nog volledig leeg
         node->character = string[0];
         BinaryNode* leaf = binarynode_init(false);
-        leaf->string = calloc(strlen(string),sizeof(char));
+        leaf->string = calloc(strlen(string)+1,sizeof(char));
         strcpy(leaf->string, string);
         leaf->parent = node;
         node->equals = leaf;
