@@ -1,7 +1,6 @@
-#include "customtrie.h"
-#include "ternarytrie.h"
 #include <string.h>
 #include <malloc.h>
+#include <stdbool.h>
 
 typedef struct BinaryNode {
     char character;

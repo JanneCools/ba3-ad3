@@ -76,49 +76,26 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
     if (arraytrie_search(trie, string)) {
         return false;
     }
-    bool finished = false;
-    bool trie_changed = false;
     if (trie->children_size == 0) {
         // enkel de wortel kan eventueel geen kinderen hebben, dat betekent dat de boom nog leeg is
         ArrayTrie* newtrie = new_arraytrie(string[0], string, 1, "\0");
         trie->children_size = 1;
         trie->children = malloc(sizeof(ArrayTrie*));
         trie->children[0] = newtrie;
-        finished = true;
-        trie_changed = true;
+        return true;
     }
     int index = 0;
-    while (! finished) {
-        size_t skip_length = strlen(trie->skip);
-
-        if (strlen(string) - index - 1 < skip_length) {
-            // string is korter dan het aantal skips, dus de top moet gesplitst worden
-            int mutual_skip = 0;
-            while (string[index+mutual_skip] == trie->skip[mutual_skip]) {
-                mutual_skip ++;
-            }
-            // nieuwe top maken die de al bestaande kinderen als kinderen heeft
-            ArrayTrie* newnode = new_arraytrie(trie->skip[mutual_skip], NULL, (int)skip_length-mutual_skip, &trie->skip[mutual_skip+1]);
-            newnode->children_size = trie->children_size;
-            newnode->children = trie->children;
-            // nieuw blad maken met de toe te voegen string
-            ArrayTrie* leaf = new_arraytrie(string[index+mutual_skip], string, 1, "\0");
-            // de huidige top aanpassen zodat de skip-string en de kinderen kloppen
-            trie->children_size = 2;
-            trie->children = malloc(2*sizeof(ArrayTrie*));
-            trie->children[0] = newnode;
-            trie->children[1] = leaf;
-            trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
-            strcpy(trie->skip, &string[index]);
-            trie->skip[mutual_skip] = '\0';
-            finished = true;
-            trie_changed = true;
+    bool searching = true;
+    ArrayTrie* parent = trie;
+    while (searching) {
+        if (trie == NULL || trie->string != NULL || strlen(string) - index - 1 < strlen(trie->skip)) {
+            searching = false;
         } else {
+            size_t skip_length = strlen(trie->skip);
             // het deel van de string dat geskipt wordt, bepalen
             char* skip_string = malloc((skip_length+1)*sizeof(char));
             memcpy(skip_string, &string[index], skip_length);
             skip_string[skip_length] = '\0';
-
             if (skip_length == 0 || strcmp(skip_string, trie->skip) == 0) {
                 // de skip-strings zijn gelijk dus we kunnen naar de volgende top
                 index += (int) skip_length;
@@ -126,79 +103,84 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
                 while (i < trie->children_size && trie->children[i]->character != string[index]) {
                     i ++;
                 }
+                parent = trie;
                 if (i == trie->children_size) {
-                    // er is nog geen kind met het karakter van de string dus een blad kan aangemaakt worden
-                    ArrayTrie* newleaf = new_arraytrie(string[index], string, 1, "\0");
-                    trie->children_size ++;
-                    trie->children = realloc(trie->children, trie->children_size * sizeof(ArrayTrie*));
-                    trie->children[trie->children_size-1] = newleaf;
-                    finished = true;
-                    trie_changed = true;
-                } else if (trie->children[i]->string != NULL) {   // de boog die we nemen leidt naar een blad
-                    index ++;
-                    if (strcmp(trie->children[i]->string, string) == 0) {
-                        // de string in het blad komt overeen met de string die we willen toevoegen
-                        finished = true;
-                        trie_changed = false;
-                    } else {
-                        // de string in het blad komt niet overeen met de string die we willen toevoegen
-                        // Dus we moeten een nieuwe top maken met als kinderen het huidig blad en het nieuw blad
-                        // en met als ouder de top waar we nu zijn (trie)
-                        ArrayTrie* leaf = trie->children[i];
-                        int skip = 0;
-                        while (leaf->string[index+skip] == string[index+skip]) {
-                            skip ++;
-                        }
-                        leaf->character = leaf->string[index+skip];     // het karakter bij het huidig blad aanpassen
-                        // blad maken met de nieuwe string
-                        ArrayTrie* newleaf = new_arraytrie(string[index+skip], string, 1, "\0");
-                        // een nieuwe top maken met als ouder "trie"
-                        ArrayTrie* node = new_arraytrie(string[index-1], NULL, 1, "\0");
-                        node->skip = realloc(node->skip, (skip+1)*sizeof(char));
-                        strcpy(node->skip, &string[index]);
-                        node->skip[skip] = '\0';
-                        node->children_size = 2;
-                        node->children = malloc(2 * sizeof(ArrayTrie*));
-                        node->children[0] = leaf;
-                        node->children[1] = newleaf;
-                        //memcpy(node->skip, &string[index+1], skip);
-                        trie->children[i] = node;
-                        finished = true;
-                        trie_changed = true;
-                    }
+                    trie = NULL;
+                    searching = false;
                 } else {
-                    // De boog die we nemen, leidt naar een interne top dus we kijken alles opnieuw na voor deze top
                     trie = trie->children[i];
                     index ++;
                 }
             } else {
                 // de skip-strings zijn niet gelijk dus we moeten deze top splitsen in een nieuwe top voor de nieuwe string en
                 // een nieuwe top voor de huidige kinderen van deze top
-                int mutual_skip = 0;
-                while (skip_string[mutual_skip] == trie->skip[mutual_skip]) {
-                    mutual_skip ++;
-                }
-                // nieuwe top maken die de al bestaande kinderen als kinderen heeft
-                ArrayTrie* newnode = new_arraytrie(trie->skip[mutual_skip], NULL, (int)skip_length-mutual_skip+1, &trie->skip[mutual_skip+1]);
-                newnode->children_size = trie->children_size;
-                newnode->children = trie->children;
-                // nieuw blad maken met de toe te voegen string
-                ArrayTrie* leaf = new_arraytrie(string[index+mutual_skip], string, 1, "\0");
-                // de huidige top aanpassen zodat de skip-string en de kinderen kloppen
-                trie->children_size = 2;
-                trie->children = malloc(2*sizeof(ArrayTrie*));
-                trie->children[0] = newnode;
-                trie->children[1] = leaf;
-                trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
-                strcpy(trie->skip, &string[index]);
-                trie->skip[mutual_skip] = '\0';
-                finished = true;
-                trie_changed = true;
+                searching = false;
             }
             free(skip_string);
         }
     }
-    return trie_changed;
+    if (trie == NULL) {
+        // we waren geëindigd in een top waarbij we een vertakking wouden nemen naar een kind met een specifiek karakter,
+        // maar dit kind bestaat niet dus we kunnen een nieuw blad maken
+        trie = parent;
+        ArrayTrie* newleaf = new_arraytrie(string[index], string, 1, "\0");
+        trie->children_size ++;
+        trie->children = realloc(trie->children, trie->children_size * sizeof(ArrayTrie*));
+        trie->children[trie->children_size-1] = newleaf;
+    } else if (trie->string != NULL) {
+        // we zijn geëindigd in een blad met een andere string
+        // Dus we moeten een nieuwe top maken met als kinderen het huidig blad en het nieuw blad
+        // en met als ouder de top waar we nu zijn (trie)
+        int i = 0;
+        while (parent->children[i]->character != trie->character) {
+            i++;
+        }
+        trie = parent;
+        ArrayTrie* leaf = trie->children[i];
+        int skip = 0;
+        while (leaf->string[index+skip] == string[index+skip]) {
+            skip ++;
+        }
+        leaf->character = leaf->string[index+skip];     // het karakter bij het huidig blad aanpassen
+        // blad maken met de nieuwe string
+        ArrayTrie* newleaf = new_arraytrie(string[index+skip], string, 1, "\0");
+        // een nieuwe top maken met als ouder "trie"
+        ArrayTrie* node = new_arraytrie(string[index-1], NULL, 1, "\0");
+        node->skip = realloc(node->skip, (skip+1)*sizeof(char));
+        strcpy(node->skip, &string[index]);
+        node->skip[skip] = '\0';
+        node->children_size = 2;
+        node->children = malloc(2 * sizeof(ArrayTrie*));
+        node->children[0] = leaf;
+        node->children[1] = newleaf;
+        trie->children[i] = node;
+    } else {
+        // we zitten in een interne top en moeten opnieuw de skip bepalen
+        size_t skip_length = strlen(trie->skip);
+        char* skip_string = malloc((skip_length+1)*sizeof(char));
+        memcpy(skip_string, &string[index], skip_length);
+        skip_string[skip_length] = '\0';
+        int mutual_skip = 0;
+        while (skip_string[mutual_skip] == trie->skip[mutual_skip]) {
+            mutual_skip ++;
+        }
+        // nieuwe top maken die de al bestaande kinderen als kinderen heeft
+        ArrayTrie* newnode = new_arraytrie(trie->skip[mutual_skip], NULL, (int)skip_length-mutual_skip+1, &trie->skip[mutual_skip+1]);
+        newnode->children_size = trie->children_size;
+        newnode->children = trie->children;
+        // nieuw blad maken met de toe te voegen string
+        ArrayTrie* leaf = new_arraytrie(string[index+mutual_skip], string, 1, "\0");
+        // de huidige top aanpassen zodat de skip-string en de kinderen kloppen
+        trie->children_size = 2;
+        trie->children = malloc(2*sizeof(ArrayTrie*));
+        trie->children[0] = newnode;
+        trie->children[1] = leaf;
+        trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
+        strcpy(trie->skip, &string[index]);
+        trie->skip[mutual_skip] = '\0';
+        free(skip_string);
+    }
+    return true;
 }
 
 bool arraytrie_remove(ArrayTrie* trie, const char* string) {

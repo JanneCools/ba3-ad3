@@ -29,7 +29,6 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     if (node->character == '\0') {
         // de boom is nog volledig leeg
         node->character = string[0];
-        //BinaryNode* leaf = calloc(1, sizeof(TernaryTrie));
         BinaryNode* leaf = binarynode_init(false);
         leaf->string = calloc(strlen(string),sizeof(char));
         strcpy(leaf->string, string);
@@ -60,7 +59,6 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     }
     if (node == NULL) {
         // hier nieuwe top aanmaken
-        //node = (BinaryNode*) calloc(1, sizeof(TernaryTrie));
         node = binarynode_init(false);
         node->character = string[index];
         if (node->character > parent->character) {
@@ -185,7 +183,6 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
     leaf->parent = NULL;
     node->equals = NULL;
     free(leaf);
-    //TernaryTrie* parent = trie->parent;
     bool finished = false;
     while (! finished) {
         if (node->equals == NULL) {
