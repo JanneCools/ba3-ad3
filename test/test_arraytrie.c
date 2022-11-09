@@ -87,6 +87,8 @@ void test_add_string_smaller_than_skip_length() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
     TEST_CHECK(arraytrie_search(ct, twenz));
+
+    arraytrie_free(ct);
 }
 
 // Hier wordt een string toegevoegd waardoor de skip van een top aangepast moet worden.
@@ -115,6 +117,8 @@ void test_add_string_with_different_skip_length() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
     TEST_CHECK(arraytrie_search(ct, twentwo));
+
+    arraytrie_free(ct);
 }
 
 void test_remove_one() {
@@ -178,6 +182,8 @@ void test_remove_only_child_of_root() {
     TEST_CHECK(arraytrie_remove(ct, one));
     TEST_SIZE(ct, 0);
     TEST_CHECK(!arraytrie_search(ct, one));
+
+    arraytrie_free(ct);
 }
 
 // Het kind van de wortel verwijderen. Hierbij heeft de wortel 2 kinderen, waarvan de 2de een interne top is.
@@ -287,6 +293,8 @@ void test_remove_child_of_node_with_2_children() {
     TEST_CHECK(arraytrie_search(ct, one));
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
+
+    arraytrie_free(ct);
 }
 
 // Het kind verwijderen van een top met 2 bladeren als kinderen. (Het te verwijderen blad is er 1 van.)
@@ -312,6 +320,8 @@ void test_remove_child_of_node_with_2_leafs_as_children() {
     TEST_CHECK(arraytrie_search(ct, one));
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, two));
+
+    arraytrie_free(ct);
 }
 
 // Het kind verwijderen van een top met meer dan 2 kinderen.
@@ -348,14 +358,16 @@ void test_remove_child_of_node_with_more_than_2_children() {
     TEST_CHECK(arraytrie_search(ct, twentyfour));
     TEST_CHECK(arraytrie_search(ct, twentyfive));
     TEST_SIZE(ct, 6);
+
+    arraytrie_free(ct);
 }
 
 TEST_LIST = {
         { "arraytrie init",test_init },
         { "arraytrie add one",test_add_one },
         { "arraytrie add more",test_add_more },
-        { "arraytrie add string smaller than skip size",test_add_string_smaller_than_skip_length},
-        { "arraytrie add string with different skip size", test_add_string_with_different_skip_length},
+        { "arraytrie add string smaller than skip length",test_add_string_smaller_than_skip_length},
+        { "arraytrie add string with different skip length", test_add_string_with_different_skip_length},
         { "arraytrie search not present",test_search_not_present},
 
         { "arraytrie remove one",test_remove_one },
@@ -370,3 +382,8 @@ TEST_LIST = {
         { "arraytrie remove child of node with more than 2 children",test_remove_child_of_node_with_more_than_2_children},
         { NULL, NULL}
 };
+
+/*TEST_LIST = {
+        { "arraytrie remove child of root with more than 2 children",test_remove_child_of_root_with_more_children},
+        { NULL, NULL}
+};*/

@@ -94,7 +94,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
             size_t skip_length = strlen(trie->skip);
             // het deel van de string dat geskipt wordt, bepalen
             char* skip_string = malloc((skip_length+1)*sizeof(char));
-            memcpy(skip_string, &string[index], skip_length);
+            strncpy(skip_string, &string[index], skip_length);
             skip_string[skip_length] = '\0';
             if (skip_length == 0 || strcmp(skip_string, trie->skip) == 0) {
                 // de skip-strings zijn gelijk dus we kunnen naar de volgende top
@@ -147,7 +147,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         // een nieuwe top maken met als ouder "trie"
         ArrayTrie* node = new_arraytrie(string[index-1], NULL, 1, "\0");
         node->skip = realloc(node->skip, (skip+1)*sizeof(char));
-        strcpy(node->skip, &string[index]);
+        strncpy(node->skip, &string[index], skip);
         node->skip[skip] = '\0';
         node->children_size = 2;
         node->children = malloc(2 * sizeof(ArrayTrie*));
@@ -158,7 +158,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         // we zitten in een interne top en moeten opnieuw de skip bepalen
         size_t skip_length = strlen(trie->skip);
         char* skip_string = malloc((skip_length+1)*sizeof(char));
-        memcpy(skip_string, &string[index], skip_length);
+        strncpy(skip_string, &string[index], skip_length);
         skip_string[skip_length] = '\0';
         int mutual_skip = 0;
         while (skip_string[mutual_skip] == trie->skip[mutual_skip]) {
@@ -168,6 +168,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         ArrayTrie* newnode = new_arraytrie(trie->skip[mutual_skip], NULL, (int)skip_length-mutual_skip+1, &trie->skip[mutual_skip+1]);
         newnode->children_size = trie->children_size;
         newnode->children = trie->children;
+        trie->children = NULL;
         // nieuw blad maken met de toe te voegen string
         ArrayTrie* leaf = new_arraytrie(string[index+mutual_skip], string, 1, "\0");
         // de huidige top aanpassen zodat de skip-string en de kinderen kloppen
@@ -176,7 +177,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         trie->children[0] = newnode;
         trie->children[1] = leaf;
         trie->skip = realloc(trie->skip, (mutual_skip+1) * sizeof(char));
-        strcpy(trie->skip, &string[index]);
+        strncpy(trie->skip, &string[index], mutual_skip);
         trie->skip[mutual_skip] = '\0';
         free(skip_string);
     }
@@ -194,105 +195,94 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
     while (! finished) {
         size_t skip_length = strlen(trie->skip);
         char* skip_string = malloc((skip_length+1)*sizeof(char));
-        memcpy(skip_string, &string[index], skip_length);
+        strncpy(skip_string, &string[index], skip_length);
         skip_string[skip_length] = '\0';
-        if (strlen(string) - index < skip_length || strcmp(skip_string, trie->skip) != 0) {
-            // string zit niet in de boom
-            finished = true;
-            removed = false;
-        } else {
-            // de skip in de string is gelijk aan de skip van de top
-            index += (int) skip_length;
-            int i = 0;
-            while (i < trie->children_size && trie->children[i]->character != string[index]) {
-                i++;
-            }
-            if (i == trie->children_size) {
-                // string is niet aanwezig in de boom
-                finished = true;
-                removed = false;
-            } else if (trie->children[i]->string != NULL) {     // het kind van de top is een blad dus de strings worden vergeleken
-                if (strcmp(trie->children[i]->string, string) == 0) {   // de strings zijn gelijk dus het blad kan verwijderd worden
-                    if (trie->children_size > 2) {
-                        // de top heeft meer dan 2 kinderen (inclusief het blad dat verwijderd zal worden)
-                        // dus het blad kan makkelijk verwijderen worden zonder veel aan te passen aan de huidige top
-                        ArrayTrie** children = trie->children;
-                        ArrayTrie* leaf = children[i];
-                        trie->children[i] = trie->children[trie->children_size-1];
-                        trie->children[trie->children_size-1] = NULL;
-                        trie->children_size --;
-                        trie->children = realloc(trie->children, trie->children_size);
-                        arraytrie_free(leaf);
-                        finished = true;
-                        removed = true;
-                    } else if (trie->children_size == 1) {
-                        // de top heeft maar 1 kind, dus de top is de wortel
-                        // Het blad kan dan gewoon verwijderd worden
-                        ArrayTrie** children = trie->children;
-                        ArrayTrie* leaf = children[0];
-                        trie->children_size = 0;
-                        trie->children = NULL;
-                        children[0] = NULL;
-                        arraytrie_free(leaf);
-                        free(children);
-                        finished = true;
-                        removed = true;
-                    } else {
-                        // de top heeft maar 1 kind na het verwijderen van het blad
-                        // dus de boom moet hier wat herschikt worden
-                        ArrayTrie* child = trie->children[0];
-                        ArrayTrie* leaf = trie->children[1];
-                        if (leaf->string == NULL || strcmp(leaf->string, string) != 0) {
-                            child = trie->children[1];
-                            leaf = trie->children[0];
-                        }
-                        trie->children[0] = NULL;
-                        trie->children[1] = NULL;
-                        arraytrie_free(leaf);
-                        char* skip = malloc((strlen(trie->skip) + strlen(child->skip) + 2) * sizeof(char));
-                        char character[2] = {child->character, '\0'};
-                        strcpy(skip, trie->skip);
-                        strcat(skip, character);
-                        strcat(skip, child->skip);
-                        skip[strlen(trie->skip) + strlen(child->skip)+1] = '\0';
-                        free(trie->skip);
-                        trie->skip = skip;
-                        ArrayTrie** children = child->children;
-                        child->children = NULL;
-                        if (child->string == NULL) {
-                            free(trie->children);
-                            trie->children = children;
-                            trie->children_size = child->children_size;
-                            child->children_size = 0;
-                            arraytrie_free(child);
-                        } else if (trie == root) {
-                            free(children);
-                            trie->children = realloc(trie->children, sizeof(ArrayTrie*));
-                            trie->children[0] = child;
-                            trie->children_size = 1;
-                            child->character = child->string[strlen(trie->skip)];
-                        } else {
-                            free(children);
-                            trie->children_size = 0;
-                            free(trie->children);
-                            trie->children = NULL;
-                            trie->string = child->string;
-                            child->string = NULL;
-                            arraytrie_free(child);
-                        }
-                        finished = true;
-                        removed = true;
+        index += (int) skip_length;
+        int i = 0;
+        while (i < trie->children_size && trie->children[i]->character != string[index]) {
+            i++;
+        }
+        if (trie->children[i]->string != NULL) {     // het kind van de top is een blad
+            if (trie->children_size > 2) {
+                // de top heeft meer dan 2 kinderen (inclusief het blad dat verwijderd zal worden)
+                // dus het blad kan makkelijk verwijderen worden zonder veel aan te passen aan de huidige top
+                ArrayTrie** children = malloc((trie->children_size-1)* sizeof(ArrayTrie*));
+                int k = 0;
+                for (int j = 0; j < trie->children_size; j++) {
+                    if (j != i) {
+                        children[k] = trie->children[j];
+                        trie->children[j] = NULL;
+                        k ++;
                     }
-                } else {
-                    // de strings zijn niet gelijk dus de string zit niet in de boom
-                    finished = true;
-                    removed = false;
                 }
+                ArrayTrie* leaf = trie->children[i];
+                trie->children[i] = NULL;
+                trie->children_size --;
+                free(trie->children);
+                trie->children = children;
+                arraytrie_free(leaf);
+                finished = true;
+                removed = true;
+            } else if (trie->children_size == 1) {
+                // de top heeft maar 1 kind, dus de top is de wortel
+                // Het blad kan dan gewoon verwijderd worden
+                ArrayTrie* leaf = trie->children[0];
+                trie->children_size = 0;
+                arraytrie_free(leaf);
+                free(trie->children);
+                trie->children = NULL;
+                finished = true;
+                removed = true;
             } else {
-                // het kind van de top is een andere top
-                index ++;
-                trie = trie->children[i];
+                // de top heeft maar 1 kind na het verwijderen van het blad
+                // dus de boom moet hier wat herschikt worden
+                ArrayTrie* child = trie->children[0];
+                ArrayTrie* leaf = trie->children[1];
+                if (leaf->string == NULL || strcmp(leaf->string, string) != 0) {
+                    child = trie->children[1];
+                    leaf = trie->children[0];
+                }
+                trie->children[0] = NULL;
+                trie->children[1] = NULL;
+                arraytrie_free(leaf);
+                char* skip = malloc((strlen(trie->skip) + strlen(child->skip) + 2) * sizeof(char));
+                char character[2] = {child->character, '\0'};
+                strcpy(skip, trie->skip);
+                strcat(skip, character);
+                strcat(skip, child->skip);
+                skip[strlen(trie->skip) + strlen(child->skip)+1] = '\0';
+                free(trie->skip);
+                trie->skip = skip;
+                ArrayTrie** children = child->children;
+                child->children = NULL;
+                if (child->string == NULL) {
+                    free(trie->children);
+                    trie->children = children;
+                    trie->children_size = child->children_size;
+                    child->children_size = 0;
+                    arraytrie_free(child);
+                } else if (trie == root) {
+                    free(children);
+                    trie->children = realloc(trie->children, sizeof(ArrayTrie*));
+                    trie->children[0] = child;
+                    trie->children_size = 1;
+                    child->character = child->string[strlen(trie->skip)];
+                } else {
+                    free(children);
+                    trie->children_size = 0;
+                    free(trie->children);
+                    trie->children = NULL;
+                    trie->string = child->string;
+                    child->string = NULL;
+                    arraytrie_free(child);
+                }
+                finished = true;
+                removed = true;
             }
+        } else {
+            // het kind van de top is een andere top
+            index ++;
+            trie = trie->children[i];
         }
         free(skip_string);
     }
