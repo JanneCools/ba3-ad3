@@ -1,5 +1,6 @@
 #include "test.h"
 #include "../include/ternarytrie.h"
+#include "../src/ternarytrie.c"
 
 #define TEST_SIZE(ct, size) \
     TEST_CHECK(ternarytrie_size(ct) == size); \
@@ -20,6 +21,12 @@ void test_add_one() {
     TEST_CHECK(ternarytrie_add(ct, string));
     TEST_CHECK(ternarytrie_search(ct, string));
     TEST_SIZE(ct, 1);
+
+    // structuur nakijken
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(ct->root->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->string, string) == 0);
+
     ternarytrie_free(ct);
 }
 
@@ -57,6 +64,18 @@ void test_add_more() {
     TEST_CHECK(!ternarytrie_add(ct, two));
     TEST_CHECK(!ternarytrie_add(ct, twenty));
     TEST_CHECK(!ternarytrie_add(ct, twentytwo));
+
+    //structuur nakijken
+    TEST_CHECK(ct->root->character == 'o');
+    TEST_CHECK(strcmp(ct->root->equals->string, one) == 0);
+    TEST_CHECK(ct->root->right->character == 't');
+    TEST_CHECK(ct->root->right->equals->equals->character == 'o');
+    TEST_CHECK(strcmp(ct->root->right->equals->equals->equals->string, two) == 0);
+    TEST_CHECK(ct->root->right->equals->equals->left->character == 'e');
+    TEST_CHECK(ct->root->right->equals->equals->left->equals->equals->equals->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->right->equals->equals->left->equals->equals->equals->equals->equals->string, twenty) == 0);
+    TEST_CHECK(ct->root->right->equals->equals->left->equals->equals->equals->equals->right->character == 't');
+    TEST_CHECK(strcmp(ct->root->right->equals->equals->left->equals->equals->equals->equals->right->equals->string, twentytwo) == 0);
 
     ternarytrie_free(ct);
 }
@@ -119,6 +138,26 @@ void test_add_similar_strings() {
     TEST_CHECK(!ternarytrie_add(ct, nineteen));
     TEST_CHECK(!ternarytrie_add(ct, twenty));
     TEST_CHECK(!ternarytrie_add(ct, sevens));
+
+    // structuur nakijken
+    TEST_CHECK(ct->root->character == 'f');
+    TEST_CHECK(ct->root->left->character == 'e');
+    TEST_CHECK(strcmp(ct->root->left->equals->equals->string, eight) == 0);
+    TEST_CHECK(strcmp(ct->root->left->equals->right->equals->string, eleven) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->string, five) == 0);
+    TEST_CHECK(ct->root->right->character == 's');
+    TEST_CHECK(ct->root->right->right->character == 't');
+    TEST_CHECK(strcmp(ct->root->right->right->equals->equals->string, ten) == 0);
+    TEST_CHECK(strcmp(ct->root->right->right->equals->right->equals->string, twenty) == 0);
+    TEST_CHECK(ct->root->right->equals->character == 'i');
+    TEST_CHECK(strcmp(ct->root->right->equals->equals->equals->equals->string, six) == 0);
+    TEST_CHECK(strcmp(ct->root->right->equals->equals->equals->right->equals->string, sixteen) == 0);
+    TEST_CHECK(strcmp(ct->root->right->equals->left->equals->equals->equals->equals->equals->string, seven) == 0);
+    TEST_CHECK(strcmp(ct->root->right->equals->left->equals->equals->equals->equals->right->equals->string, seventeen) == 0);
+    TEST_CHECK(strcmp(ct->root->right->equals->left->equals->equals->equals->equals->right->left->equals->string, sevens) == 0);
+    TEST_CHECK(ct->root->right->left->character = 'n');
+    TEST_CHECK(strcmp(ct->root->right->left->equals->equals->equals->equals->equals->string, nine) == 0);
+    TEST_CHECK(strcmp(ct->root->right->left->equals->equals->equals->equals->right->equals->string, nineteen) == 0);
 
     ternarytrie_free(ct);
 }
@@ -197,6 +236,12 @@ void test_remove_twenty() {
 
     TEST_SIZE(ct, 2);
 
+    // structuur nakijken
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->string, two) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->string, twentytwo) == 0);
+
+
     ternarytrie_free(ct);
 }
 
@@ -225,11 +270,16 @@ void test_remove_twentytwo() {
 
     TEST_SIZE(ct, 2);
 
+    // structuur nakijken
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->string, two) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->string, twenty) == 0);
+
     ternarytrie_free(ct);
 }
 
-// Hier worden de string "two", "twenty", "twentyfour" en "twentyseven" toegevoegd. Dan wordt "twentyseven" verwijderd.
-void test_remove_twentyseven() {
+// Hier worden de string "two", "twenty", "twentyfour" en "twentyseven" toegevoegd. Dan wordt "twentyfour" verwijderd.
+void test_remove_twentyfour() {
     TernaryTrie* ct = ternarytrie_init();
     TEST_CHECK(ct != NULL);
 
@@ -244,13 +294,19 @@ void test_remove_twentyseven() {
 
     TEST_SIZE(ct, 4);
 
-    TEST_CHECK(ternarytrie_remove(ct, twentyseven));
+    TEST_CHECK(ternarytrie_remove(ct, twentyfour));
 
     TEST_CHECK(ternarytrie_search(ct, twenty));
-    TEST_CHECK(ternarytrie_search(ct,twentyfour));
-    TEST_CHECK(!ternarytrie_search(ct, twentyseven));
+    TEST_CHECK(ternarytrie_search(ct,twentyseven));
+    TEST_CHECK(!ternarytrie_search(ct, twentyfour));
 
     TEST_SIZE(ct, 3);
+
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->string, two) == 0);
+    TEST_CHECK(ct->root->equals->equals->left->character == 'e');
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->equals->equals->equals->equals->string, twenty) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->equals->equals->equals->right->equals->string, twentyseven) == 0);
 
     ternarytrie_free(ct);
 }
@@ -272,10 +328,18 @@ void test_remove_far_leafs() {
     TEST_CHECK(ternarytrie_search(ct, twentyone));
     TEST_CHECK(ternarytrie_search(ct, twentytwo));
 
+    // structuur nakijken
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->equals->string, twentyone) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->right->equals->string, twentytwo) == 0);
+
     TEST_CHECK(ternarytrie_remove(ct, twentyone));
     TEST_CHECK(!ternarytrie_search(ct, twentyone));
     TEST_CHECK(ternarytrie_search(ct, twentytwo));
     TEST_SIZE(ct, 1);
+
+    // structuur nakijken
+    TEST_CHECK(strcmp(ct->root->equals->string, twentytwo) == 0);
 
     TEST_CHECK(ternarytrie_remove(ct, twentytwo));
     TEST_CHECK(!ternarytrie_search(ct, twentytwo));
@@ -296,12 +360,12 @@ TEST_LIST = {
         { "ternarytrie remove not present",test_remove_not_present},
         { "ternarytrie remove twenty",test_remove_twenty },
         { "ternarytrie remove twentytwo",test_remove_twentytwo },
-        { "ternarytrie remove twentyseven",test_remove_twentyseven },
+        { "ternarytrie remove twentyfour",test_remove_twentyfour },
         { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
 };
 
 /*TEST_LIST = {
-        { "ternarytrie remove far leafs",test_remove_far_leafs},
+        { "ternarytrie test",test_remove_twentytwo },
         { NULL, NULL}
 };*/
