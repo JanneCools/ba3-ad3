@@ -300,14 +300,17 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
             parent->equals = child;
             node->parent = NULL;
             node->equals = NULL;
-            customtrie_free(trie);
+            binarynode_free(node);
             node = parent;
             rearranging = false;
+        } else {
+            rearranging = false;
         }
-        rearranging = false;
     }
-    // als we in de wortel geëindigd zijn en de wortel geen kinderen heeft, dan moet de skip van de wortel '\0' zijn
-    if (node->parent == NULL && node->left == NULL && node->right == NULL && node->equals == NULL) {
+    // als we in de wortel geëindigd zijn en de wortel geen kinderen heeft of als het equals-kind van een top een blad is,
+    // dan moet de skip van de wortel '\0' zijn
+    if ((node->parent == NULL && node->left == NULL && node->right == NULL && node->equals == NULL)
+        || node->equals->string != NULL) {
         node->skip = realloc(node->skip, sizeof(char));
         node->skip[0] = '\0';
     }
