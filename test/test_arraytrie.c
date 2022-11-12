@@ -1,5 +1,6 @@
 #include "test.h"
 #include "arraytrie.h"
+#include "../src/arraytrie.c"
 
 #define TEST_SIZE(ct, size) \
     TEST_CHECK(arraytrie_size(ct) == size); \
@@ -20,6 +21,12 @@ void test_add_one() {
     TEST_CHECK(arraytrie_add(ct, string));
     TEST_CHECK(arraytrie_search(ct, string));
     TEST_SIZE(ct, 1);
+
+    // structuur nakijken
+    TEST_CHECK(ct->character == '\0' && ct->children_size == 1 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 't' && ct->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[0]->string, string) == 0);
+
     arraytrie_free(ct);
 }
 
@@ -58,6 +65,19 @@ void test_add_more() {
     TEST_CHECK(!arraytrie_add(ct, twenty));
     TEST_CHECK(!arraytrie_add(ct, twentytwo));
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && ct->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->skip, "nty") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twentytwo) == 0);
+
+
     arraytrie_free(ct);
 }
 
@@ -88,6 +108,21 @@ void test_add_string_smaller_than_skip_length() {
     TEST_CHECK(arraytrie_search(ct, twentytwo));
     TEST_CHECK(arraytrie_search(ct, twenz));
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->skip, "n") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 'z');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twenz) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->skip, "y") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->children[1]->string, twentytwo) == 0);
+
     arraytrie_free(ct);
 }
 
@@ -117,6 +152,21 @@ void test_add_string_with_different_skip_length() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
     TEST_CHECK(arraytrie_search(ct, twentwo));
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->skip, "nt") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 'w');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twentwo) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == 'y');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->skip, "") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->children[1]->string, twentytwo) == 0);
 
     arraytrie_free(ct);
 }
@@ -151,8 +201,27 @@ void test_remove_more() {
     TEST_SIZE(ct, 4);
 
     TEST_CHECK(arraytrie_remove(ct, one));
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "tw") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->character == 'e' && strcmp(ct->children[1]->skip, "nty") == 0 && ct->children[1]->children_size == 2);
+    TEST_CHECK(ct->children[1]->children[0]->character == '\0' && strcmp(ct->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 't' && strcmp(ct->children[1]->children[1]->string, twentytwo) == 0);
+
     TEST_CHECK(arraytrie_remove(ct, two));
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "twenty") == 0);
+    TEST_CHECK(ct->children[0]->character == '\0' && strcmp(ct->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->string, twentytwo) == 0);
+
     TEST_CHECK(arraytrie_remove(ct, twenty));
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 1 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 't' && strcmp(ct->children[0]->string, twentytwo) == 0);
+
     TEST_CHECK(arraytrie_remove(ct, twentytwo));
 
     TEST_SIZE(ct, 0);
@@ -213,7 +282,7 @@ void test_remove_child_of_root_with_2_children() {
     arraytrie_free(ct);
 }
 
-// Het kind van de wortel verwijderen. Hierbij heeft de wortel 2 kinderen, waarvan de 2de een interne top is.
+// Het kind van de wortel verwijderen. Hierbij heeft de wortel 2 bladeren als kinderen.
 void test_remove_child_of_root_with_2_leafs() {
     ArrayTrie* ct = arraytrie_init();
     TEST_CHECK(ct != NULL);
@@ -230,6 +299,9 @@ void test_remove_child_of_root_with_2_leafs() {
     TEST_SIZE(ct, 1);
     TEST_CHECK(!arraytrie_search(ct, one));
     TEST_CHECK(arraytrie_search(ct, two));
+
+    TEST_CHECK(ct->children_size == 1 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 't' && strcmp(ct->children[0]->string, two) == 0);
 
     arraytrie_free(ct);
 }
@@ -258,6 +330,18 @@ void test_remove_child_of_root_with_more_children() {
     TEST_CHECK(arraytrie_search(ct, twentytwo));
     TEST_CHECK(arraytrie_search(ct, four));
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 3 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[2]->character == 'f' && strcmp(ct->children[2]->string, four) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->skip, "nty") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twentytwo) == 0);
+
     TEST_CHECK(arraytrie_remove(ct, four));
 
     TEST_SIZE(ct, 4);
@@ -266,6 +350,8 @@ void test_remove_child_of_root_with_more_children() {
     TEST_CHECK(arraytrie_search(ct, two));
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
+
+    TEST_CHECK(ct->children_size == 2);
 
     arraytrie_free(ct);
 }
@@ -294,6 +380,13 @@ void test_remove_child_of_node_with_2_children() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "wenty") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == '\0' && strcmp(ct->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 't' && strcmp(ct->children[1]->children[1]->string, twentytwo) == 0);
+
     arraytrie_free(ct);
 }
 
@@ -321,6 +414,13 @@ void test_remove_child_of_node_with_2_leafs_as_children() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, two));
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->string, twenty) == 0);
+
     arraytrie_free(ct);
 }
 
@@ -347,6 +447,25 @@ void test_remove_child_of_node_with_more_than_2_children() {
 
     TEST_SIZE(ct, 7);
 
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, one) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && strcmp(ct->children[1]->skip, "w") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'o' && strcmp(ct->children[1]->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && strcmp(ct->children[1]->children[1]->skip, "nty") == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children_size == 4);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twentytwo) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[2]->character == 'o');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[2]->string, twentyone) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[3]->character == 'f');
+    TEST_CHECK(ct->children[1]->children[1]->children[3]->children[0]->character == 'o');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[3]->children[0]->string, twentyfour) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[3]->children[1]->character == 'i');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[3]->children[1]->string, twentyfive) == 0);
+
     TEST_CHECK(arraytrie_search(ct, twentyone));
     TEST_CHECK(arraytrie_remove(ct, twentyone));
 
@@ -358,6 +477,18 @@ void test_remove_child_of_node_with_more_than_2_children() {
     TEST_CHECK(arraytrie_search(ct, twentyfour));
     TEST_CHECK(arraytrie_search(ct, twentyfive));
     TEST_SIZE(ct, 6);
+
+    // structuur nakijken
+    TEST_CHECK(ct->children[1]->children[1]->children_size == 3);
+    TEST_CHECK(ct->children[1]->children[1]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[1]->string, twentytwo) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[2]->character == 'f');
+    TEST_CHECK(ct->children[1]->children[1]->children[2]->children[0]->character == 'o');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[2]->children[0]->string, twentyfour) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->children[2]->children[1]->character == 'i');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->children[2]->children[1]->string, twentyfive) == 0);
 
     arraytrie_free(ct);
 }

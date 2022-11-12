@@ -266,7 +266,9 @@ bool arraytrie_remove(ArrayTrie* trie, const char* string) {
                     trie->children = realloc(trie->children, sizeof(ArrayTrie*));
                     trie->children[0] = child;
                     trie->children_size = 1;
-                    child->character = child->string[strlen(trie->skip)];
+                    child->character = child->string[0];
+                    trie->skip = realloc(trie->skip, sizeof(char));
+                    trie->skip[0] = '\0';
                 } else {
                     free(children);
                     trie->children_size = 0;
