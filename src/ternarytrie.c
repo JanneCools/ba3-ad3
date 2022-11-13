@@ -133,7 +133,10 @@ void rearrange_trie(BinaryNode* node) {
         left->parent = NULL;
         free(left);
         if (right != NULL) {
-            BinaryNode* newRight = right;
+            BinaryNode* newRight = node->right;
+            if (newRight == NULL) {
+                newRight = node;
+            }
             while (newRight->right != NULL) {
                 newRight = newRight->right;
             }
@@ -214,13 +217,7 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
             // dus het pad van de wortel naar deze top kan eventueel verkort worden
             while (node->parent != NULL && node->parent->equals == node && node->left == NULL && node->right == NULL) {
                 BinaryNode* parent = node->parent;
-                if (parent->right == node) {
-                    parent->right = NULL;
-                } else if (parent->left == node) {
-                    parent->left = NULL;
-                } else {
-                    parent->equals = NULL;
-                }
+                parent->equals = NULL;
                 if (node->equals != NULL) {
                     BinaryNode* equals = node->equals;
                     node->equals = NULL;
@@ -237,9 +234,6 @@ bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
         } else {
             finished = true;
         }
-    }
-    if (node->parent == NULL) {
-        rearrange_trie(node);
     }
     trie->size --;
     return true;

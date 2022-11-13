@@ -493,6 +493,249 @@ void test_remove_child_of_node_with_more_than_2_children() {
     arraytrie_free(ct);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Hier worden de datasets toegevoegd en terug verwijderd aan de trie om te controleren dat alles foutloos verkoopt
+void dataset_geschud_piepklein() {
+    FILE* fp = fopen("../data/geschud_piepklein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("length: %zu, string %s", strlen(string), string);
+        TEST_CHECK(arraytrie_add(ct, string));
+        TEST_CHECK(arraytrie_search(ct, string));
+        size ++;
+        //printf("size: %zu\n", size);
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu\n", size);
+
+    fp = fopen("../data/geschud_piepklein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s", string);
+        TEST_CHECK(arraytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_piepklein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(arraytrie_search(ct, string));
+        TEST_CHECK(arraytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    arraytrie_free(ct);
+}
+
+void dataset_geschud_klein() {
+    FILE* fp = fopen("../data/geschud_klein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(arraytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_klein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(arraytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_klein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(arraytrie_search(ct, string));
+        TEST_CHECK(arraytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    arraytrie_free(ct);
+}
+
+void dataset_geschud_middelmaat() {
+    FILE* fp = fopen("../data/geschud_middelmaat.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(arraytrie_add(ct, string));
+        size ++;
+    }
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_middelmaat.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(arraytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_middelmaat.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(arraytrie_search(ct, string));
+        TEST_CHECK(arraytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    arraytrie_free(ct);
+}
+
+void dataset_geschud_groot() {
+    FILE* fp = fopen("../data/geschud_groot.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(arraytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_groot.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(arraytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_groot.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(arraytrie_search(ct, string));
+        TEST_CHECK(arraytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    arraytrie_free(ct);
+}
+
+void dataset_volledig() {
+    FILE* fp = fopen("../data/blokgrafen.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(arraytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(arraytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(arraytrie_search(ct, string));
+        TEST_CHECK(arraytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    arraytrie_free(ct);
+}
+
 TEST_LIST = {
         { "arraytrie init",test_init },
         { "arraytrie add one",test_add_one },
@@ -514,7 +757,12 @@ TEST_LIST = {
         { NULL, NULL}
 };
 
+// aangepaste TEST_LIST voor de datasets
 /*TEST_LIST = {
-        { "arraytrie remove child of root with more than 2 children",test_remove_child_of_root_with_more_children},
+        { "customtrie dataset piepklein",dataset_geschud_piepklein },
+        { "customtrie dataset klein",dataset_geschud_klein },
+        { "customtrie dataset middelmaat",dataset_geschud_middelmaat },
+        { "customtrie dataset groot",dataset_geschud_groot },
+        { "customtrie dataset volledig",dataset_volledig },
         { NULL, NULL}
 };*/

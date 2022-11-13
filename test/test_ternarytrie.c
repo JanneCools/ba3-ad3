@@ -1,5 +1,6 @@
+#include <stdlib.h>
 #include "test.h"
-#include "../include/ternarytrie.h"
+#include "ternarytrie.h"
 #include "../src/ternarytrie.c"
 
 #define TEST_SIZE(ct, size) \
@@ -348,6 +349,248 @@ void test_remove_far_leafs() {
     ternarytrie_free(ct);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Hier worden de datasets toegevoegd en terug verwijderd aan de trie om te controleren dat alles foutloos verkoopt
+void dataset_geschud_piepklein() {
+    FILE* fp = fopen("../data/geschud_piepklein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_piepklein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_piepklein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_search(ct, string));
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_geschud_klein() {
+    FILE* fp = fopen("../data/geschud_klein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_klein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_klein.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_search(ct, string));
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_geschud_middelmaat() {
+    FILE* fp = fopen("../data/geschud_middelmaat.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_middelmaat.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_middelmaat.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_search(ct, string));
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_geschud_groot() {
+    FILE* fp = fopen("../data/geschud_groot.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud_groot.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud_groot.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_search(ct, string));
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_volledig() {
+    FILE* fp = fopen("../data/blokgrafen.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+    printf("size: %zu", size);
+
+    fp = fopen("../data/geschud.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    fclose(fp);
+
+    fp = fopen("../data/geschud.g6", "r");
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_search(ct, string));
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
 TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
@@ -365,7 +608,12 @@ TEST_LIST = {
         { NULL, NULL}
 };
 
+// aangepaste TEST_LIST voor de datasets
 /*TEST_LIST = {
-        { "ternarytrie test",test_remove_twentytwo },
+        { "ternarytrie dataset piepklein",dataset_geschud_piepklein },
+        { "ternarytrie dataset klein",dataset_geschud_klein },
+        { "ternarytrie dataset middelmaat",dataset_geschud_middelmaat },
+        { "ternarytrie dataset groot",dataset_geschud_groot },
+        { "ternarytrie dataset volledig",dataset_volledig },
         { NULL, NULL}
 };*/

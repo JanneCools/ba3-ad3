@@ -107,7 +107,7 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
         node->parent = node1;
         BinaryNode* node2 = binarynode_init(true);  // ouder van nieuwe string
         node2->character = string[index+mutual_skip];
-        if (string[index+mutual_skip] < node->string[index+mutual_skip]) {
+        if (node2->character < node1->character) {
             node1->left = node2;
         } else {
             node1->right = node2;
@@ -127,43 +127,37 @@ bool customtrie_add(CustomTrie* trie, const char* string) {
                && string[index+mutual_skip] == node->skip[mutual_skip]) {
             mutual_skip ++;
         }
-        // karakter en skip van trie aanpassen
+        char new_char = node->skip[mutual_skip];
+        char* new_mutual_skip = malloc((mutual_skip+1) * sizeof(char));
+        strncpy(new_mutual_skip, node->skip, mutual_skip);
+        new_mutual_skip[mutual_skip] = '\0';
         char* new_skip = calloc(skip_length-mutual_skip, sizeof(char));
         strncpy(new_skip, &node->skip[mutual_skip+1], skip_length-mutual_skip-1);
-        node->character = node->skip[mutual_skip];
         free(node->skip);
-        node->skip = new_skip;
-        // nieuwe ouder maken voor trie die het kind wordt van de ouder van trie
-        BinaryNode* new_parent = binarynode_init(false);
-        new_parent->character = string[index-1];
-        new_parent->skip = calloc(mutual_skip+1, sizeof(char));
-        strncpy(new_parent->skip, &string[index], mutual_skip);
+        node->skip = new_mutual_skip;
+        // nieuw equals-kind van node die het equals-kind van node als eigen kind krijgt
+        BinaryNode* new_child = binarynode_init(false);
+        new_child->character = new_char;
+        new_child->skip = new_skip;
+        new_child->equals = node->equals;
+        new_child->equals->parent = new_child;
+        node->equals = new_child;
+        new_child->parent = node;
         // blad met nieuwe string maken
         BinaryNode* leaf = binarynode_init(true);
         leaf->string = calloc(strlen(string)+1, sizeof(char));
         strcpy(leaf->string, string);
         // ouder van nieuw blad maken
-        BinaryNode* binaryNode = binarynode_init(true);
-        binaryNode->character = string[index + mutual_skip];
-        // alle toppen verbinden
-        if (new_parent->character < parent->character) {
-            parent->left = new_parent;
-        } else if (new_parent->character > parent->character) {
-            parent->right = new_parent;
+        BinaryNode* new_node = binarynode_init(true);
+        new_node->character = string[index + mutual_skip];
+        new_node->equals = leaf;
+        leaf->parent = new_node;
+        if (new_node->character < new_child->character) {
+            new_child->left = new_node;
         } else {
-            parent->equals = new_parent;
+            new_child->right = new_node;
         }
-        new_parent->parent = parent;
-        new_parent->equals = node;
-        node->parent = new_parent;
-        if (binaryNode->character < node->character) {
-            node->left = binaryNode;
-        } else {
-            node->right = binaryNode;
-        }
-        binaryNode->parent = node;
-        binaryNode->equals = leaf;
-        leaf->parent = binaryNode;
+        new_node->parent = new_child;
     }
     trie->size ++;
     return true;
@@ -251,6 +245,9 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     free(left);
                     if (right != NULL) {
                         BinaryNode* newRight = node->right;
+                        if (newRight == NULL) {
+                            newRight = node;
+                        }
                         while (newRight->right != NULL) {
                             newRight = newRight->right;
                         }
