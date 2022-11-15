@@ -1,6 +1,7 @@
 #include "test.h"
 #include "customtrie.h"
 #include "../src/customtrie.c"
+#include <sys/time.h>
 
 #define TEST_SIZE(ct, size) \
     TEST_CHECK(customtrie_size(ct) == size); \
@@ -466,33 +467,47 @@ void dataset_geschud_piepklein() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
 
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("length: %zu, string %s", strlen(string), string);
         TEST_CHECK(customtrie_add(ct, string));
-        TEST_CHECK(customtrie_search(ct, string));
         size ++;
-        //printf("size: %zu\n", size);
     }
-
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
     fclose(fp);
 
     TEST_SIZE(ct, size);
-    printf("size: %zu\n", size);
 
     fp = fopen("../data/geschud_piepklein.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("string %s", string);
         TEST_CHECK(customtrie_search(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
     fclose(fp);
 
     fp = fopen("../data/geschud_piepklein.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(customtrie_search(ct, string));
         TEST_CHECK(customtrie_remove(ct, string));
     }
-
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
     fclose(fp);
 
 
@@ -516,31 +531,47 @@ void dataset_geschud_klein() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
 
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
         TEST_CHECK(customtrie_add(ct, string));
         size ++;
     }
-
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
     fclose(fp);
 
     TEST_SIZE(ct, size);
-    printf("size: %zu", size);
 
     fp = fopen("../data/geschud_klein.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("string %s, size %d", string, (int)size);
         TEST_CHECK(customtrie_search(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
     fclose(fp);
 
     fp = fopen("../data/geschud_klein.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(customtrie_search(ct, string));
         TEST_CHECK(customtrie_remove(ct, string));
     }
-
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
     fclose(fp);
 
 
@@ -564,31 +595,47 @@ void dataset_geschud_middelmaat() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
 
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
         TEST_CHECK(customtrie_add(ct, string));
         size ++;
     }
-
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
     fclose(fp);
 
     TEST_SIZE(ct, size);
-    printf("size: %zu", size);
 
     fp = fopen("../data/geschud_middelmaat.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("string %s, size %d", string, (int)size);
         TEST_CHECK(customtrie_search(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
     fclose(fp);
 
     fp = fopen("../data/geschud_middelmaat.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(customtrie_search(ct, string));
         TEST_CHECK(customtrie_remove(ct, string));
     }
-
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
     fclose(fp);
 
 
@@ -612,31 +659,111 @@ void dataset_geschud_groot() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
 
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
         TEST_CHECK(customtrie_add(ct, string));
         size ++;
     }
-
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
     fclose(fp);
 
     TEST_SIZE(ct, size);
-    printf("size: %zu", size);
 
     fp = fopen("../data/geschud_groot.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("string %s, size %d", string, (int)size);
         TEST_CHECK(customtrie_search(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
     fclose(fp);
 
     fp = fopen("../data/geschud_groot.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(customtrie_search(ct, string));
         TEST_CHECK(customtrie_remove(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
 
+
+    TEST_SIZE(ct, 0);
+
+    customtrie_free(ct);
+}
+
+void dataset_geschud_zeer_groot() {
+    FILE* fp = fopen("../data/geschud_zeer_groot.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    CustomTrie* ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(customtrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/geschud_zeer_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(customtrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/geschud_zeer_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(customtrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
     fclose(fp);
 
 
@@ -660,31 +787,47 @@ void dataset_volledig() {
     CustomTrie* ct = customtrie_init();
     TEST_CHECK(ct != NULL);
 
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
         TEST_CHECK(customtrie_add(ct, string));
         size ++;
     }
-
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
     fclose(fp);
 
     TEST_SIZE(ct, size);
-    printf("size: %zu", size);
 
     fp = fopen("../data/geschud.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("string %s, size %d", string, (int)size);
         TEST_CHECK(customtrie_search(ct, string));
     }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
     fclose(fp);
 
     fp = fopen("../data/geschud.g6", "r");
+    gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(customtrie_search(ct, string));
         TEST_CHECK(customtrie_remove(ct, string));
     }
-
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
     fclose(fp);
 
 
@@ -723,6 +866,7 @@ TEST_LIST = {
         { "customtrie dataset klein",dataset_geschud_klein },
         { "customtrie dataset middelmaat",dataset_geschud_middelmaat },
         { "customtrie dataset groot",dataset_geschud_groot },
+        { "customtrie dataset zeer groot",dataset_geschud_zeer_groot },
         { "customtrie dataset volledig",dataset_volledig },
         { NULL, NULL}
 };*/
