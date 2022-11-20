@@ -401,7 +401,6 @@ void dataset_geschud_piepklein() {
     gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(ternarytrie_search(ct, string));
         TEST_CHECK(ternarytrie_remove(ct, string));
     }
     gettimeofday(&end, 0);
@@ -466,7 +465,6 @@ void dataset_geschud_klein() {
     gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(ternarytrie_search(ct, string));
         TEST_CHECK(ternarytrie_remove(ct, string));
     }
     gettimeofday(&end, 0);
@@ -531,7 +529,6 @@ void dataset_geschud_middelmaat() {
     gettimeofday(&begin, 0);
     while (fgets(string, sizeof(string), fp)) {
         //printf("size: %llu, string: %s", ct->size, string);
-        TEST_CHECK(ternarytrie_search(ct, string));
         TEST_CHECK(ternarytrie_remove(ct, string));
     }
     gettimeofday(&end, 0);
@@ -675,8 +672,8 @@ void dataset_geschud_zeer_groot() {
     ternarytrie_free(ct);
 }
 
-void dataset_volledig() {
-    FILE* fp = fopen("../data/blokgrafen.g6", "r");
+void dataset_geschud_volledig() {
+    FILE* fp = fopen("../data/geschud.g6", "r");
     //char* string = NULL;
     char string[200];
     //size_t len = 0;
@@ -738,6 +735,389 @@ void dataset_volledig() {
 
     ternarytrie_free(ct);
 }
+void dataset_piepklein() {
+    FILE* fp = fopen("../data/blokgrafen_piepklein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen_piepklein.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen_piepklein.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_klein() {
+    FILE* fp = fopen("../data/blokgrafen_klein.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen_klein.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen_klein.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_middelmaat() {
+    FILE* fp = fopen("../data/blokgrafen_middelmaat.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen_middelmaat.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen_middelmaat.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_groot() {
+    FILE* fp = fopen("../data/blokgrafen_groot.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_zeer_groot() {
+    FILE* fp = fopen("../data/blokgrafen_zeer_groot.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen_zeer_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen_zeer_groot.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
+
+void dataset_volledig() {
+    FILE* fp = fopen("../data/blokgrafen.g6", "r");
+    //char* string = NULL;
+    char string[200];
+    //size_t len = 0;
+
+    size_t size = 0;
+
+    if (fp == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size %zu, length: %zu, string %s", size, strlen(string), string);
+        TEST_CHECK(ternarytrie_add(ct, string));
+        size ++;
+    }
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = (double)seconds + (double)microseconds*1e-6;
+    printf("size: %zu\n", size);
+    printf("tijd voor toevoegen: %f seconds\n", elapsed);
+    fclose(fp);
+
+    TEST_SIZE(ct, size);
+
+    fp = fopen("../data/blokgrafen.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("string %s, size %d", string, (int)size);
+        TEST_CHECK(ternarytrie_search(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor zoeken: %f seconds\n", elapsed);
+    fclose(fp);
+
+    fp = fopen("../data/blokgrafen.g6", "r");
+    gettimeofday(&begin, 0);
+    while (fgets(string, sizeof(string), fp)) {
+        //printf("size: %llu, string: %s", ct->size, string);
+        TEST_CHECK(ternarytrie_remove(ct, string));
+    }
+    gettimeofday(&end, 0);
+    seconds = end.tv_sec - begin.tv_sec;
+    microseconds = end.tv_usec - begin.tv_usec;
+    elapsed = (double)seconds + (double)microseconds * 1e-6;
+    printf("tijd voor verwijderen: %f seconds\n", elapsed);
+    fclose(fp);
+
+
+    TEST_SIZE(ct, 0);
+
+    ternarytrie_free(ct);
+}
 
 TEST_LIST = {
         {"ternarytrie init",test_init },
@@ -758,11 +1138,17 @@ TEST_LIST = {
 
 // aangepaste TEST_LIST voor de datasets
 /*TEST_LIST = {
-        { "ternarytrie dataset piepklein",dataset_geschud_piepklein },
-        { "ternarytrie dataset klein",dataset_geschud_klein },
-        { "ternarytrie dataset middelmaat",dataset_geschud_middelmaat },
-        { "ternarytrie dataset groot",dataset_geschud_groot },
-        { "ternarytrie dataset zeer groot",dataset_geschud_zeer_groot },
-        { "ternarytrie dataset volledig",dataset_volledig },
+        { "ternarytrie dataset geschud piepklein",dataset_geschud_piepklein },
+        { "ternarytrie dataset geschud klein",dataset_geschud_klein },
+        { "ternarytrie dataset geschud middelmaat",dataset_geschud_middelmaat },
+        { "ternarytrie dataset geschud groot",dataset_geschud_groot },
+        { "ternarytrie dataset geschud zeer groot",dataset_geschud_zeer_groot },
+        { "ternarytrie dataset volledig",dataset_geschud_volledig },
+        {"ternarytrie dataset piepklein", dataset_piepklein},
+        {"ternarytrie dataset klein", dataset_klein},
+        {"ternarytrie dataset middelmaat", dataset_middelmaat},
+        {"ternarytrie dataset groot", dataset_groot},
+        {"ternarytrie dataset zeer groot", dataset_zeer_groot},
+        {"ternarytrie dataset volledig", dataset_volledig},
         { NULL, NULL}
 };*/
