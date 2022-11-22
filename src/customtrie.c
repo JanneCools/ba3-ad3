@@ -221,61 +221,7 @@ bool customtrie_remove(CustomTrie* trie, const char* string) {
                     binarynode_free(child);
                 }
             } else {
-                if (node->left != NULL) {
-                    BinaryNode* right = node->right;
-                    BinaryNode* left = node->left;
-                    node->character = left->character;
-                    node->left = left->left;
-                    node->right = left->right;
-                    node->equals = left->equals;
-                    free(node->skip);
-                    node->skip = left->skip;
-                    if (left->left != NULL) {
-                        left->left->parent = node;
-                    }
-                    if (left->right != NULL) {
-                        left->right->parent = node;
-                    }
-                    left->equals->parent = node;
-                    left->left = NULL;
-                    left->right = NULL;
-                    left->equals = NULL;
-                    left->parent = NULL;
-                    left->skip = NULL;
-                    free(left);
-                    if (right != NULL) {
-                        BinaryNode* newRight = node->right;
-                        if (newRight == NULL) {
-                            newRight = node;
-                        }
-                        while (newRight->right != NULL) {
-                            newRight = newRight->right;
-                        }
-                        newRight->right = right;
-                        right->parent = newRight;
-                    }
-                } else if (node->right != NULL) {
-                    BinaryNode* right = node->right;
-                    node->character = right->character;
-                    node->left = right->left;
-                    node->right = right->right;
-                    node->equals = right->equals;
-                    free(node->skip);
-                    node->skip = right->skip;
-                    if (right->left != NULL) {
-                        right->left->parent = node;
-                    }
-                    if (right->right != NULL) {
-                        right->right->parent = node;
-                    }
-                    right->equals->parent = node;
-                    right->left = NULL;
-                    right->right = NULL;
-                    right->equals = NULL;
-                    right->parent = NULL;
-                    right->skip = NULL;
-                    free(right);
-                }
+                rearrange_trie(node);
             }
         } else if (node->parent == NULL) {
             rearranging = false;    // we zitten in de wortel

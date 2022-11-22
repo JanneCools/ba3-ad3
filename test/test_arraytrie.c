@@ -172,6 +172,69 @@ void test_add_string_with_different_skip_length() {
     arraytrie_free(ct);
 }
 
+
+// Wanneer een nieuwe string toegevoegd moet worden, wordt er eerst gezocht naar de plaats
+// waar de string toegevoegd zal worden. Dit kan eindigen in een blad
+// waarbij een nieuwe interne top toegevoegd moet worden. Deze situatie wordt in 2 testen nagekeken.
+// In de eerste test hebben de beide strings geen gemeenschappelijke deelstring, in de 2de test wel.
+void test_add_string_without_mutual_skip() {
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* seven = "seven";
+    const char* seventy = "seventy";
+    const char* seventeen = "seventeen";
+
+    TEST_CHECK(arraytrie_add(ct, seven));
+    TEST_CHECK(arraytrie_add(ct, seventy));
+    TEST_CHECK(arraytrie_add(ct, seventeen));
+
+    TEST_SIZE(ct, 3);
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2);
+    TEST_CHECK(strcmp(ct->skip, "seven") == 0);
+    TEST_CHECK(ct->children[0]->character == '\0' && ct->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[0]->string, seven) == 0);
+    TEST_CHECK(ct->children[1]->character == 't' && ct->children[1]->children_size == 2);
+    TEST_CHECK(strcmp(ct->children[1]->skip, "") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'y' && ct->children[1]->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[1]->children[0]->string, seventy) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && ct->children[1]->children[1]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->string, seventeen) == 0);
+
+    arraytrie_free(ct);
+}
+
+void test_add_string_with_mutual_skip() {
+    ArrayTrie* ct = arraytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* six = "six";
+    const char* seventy = "seventy";
+    const char* seventeen = "seventeen";
+
+    TEST_CHECK(arraytrie_add(ct, six));
+    TEST_CHECK(arraytrie_add(ct, seventy));
+    TEST_CHECK(arraytrie_add(ct, seventeen));
+
+    TEST_SIZE(ct, 3);
+
+    // structuur nakijken
+    TEST_CHECK(ct->children_size == 2);
+    TEST_CHECK(strcmp(ct->skip, "s") == 0);
+    TEST_CHECK(ct->children[0]->character == 'i' && ct->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[0]->string, six) == 0);
+    TEST_CHECK(ct->children[1]->character == 'e' && ct->children[1]->children_size == 2);
+    TEST_CHECK(strcmp(ct->children[1]->skip, "vent") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == 'y' && ct->children[1]->children[0]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[1]->children[0]->string, seventy) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 'e' && ct->children[1]->children[1]->children_size == 0);
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->string, seventeen) == 0);
+
+    arraytrie_free(ct);
+}
+
 void test_remove_one() {
     ArrayTrie* ct = arraytrie_init();
     TEST_CHECK(ct != NULL);
@@ -1235,6 +1298,8 @@ TEST_LIST = {
         { "arraytrie add more",test_add_more },
         { "arraytrie add string smaller than skip length",test_add_string_smaller_than_skip_length},
         { "arraytrie add string with different skip length", test_add_string_with_different_skip_length},
+        { "arraytrie add string without mutual skip",test_add_string_without_mutual_skip },
+        { "arraytrie add string with mutual skip",test_add_string_with_mutual_skip },
         { "arraytrie search not present",test_search_not_present},
 
         { "arraytrie remove one",test_remove_one },

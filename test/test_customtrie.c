@@ -82,6 +82,66 @@ void test_add_more() {
     customtrie_free(ct);
 }
 
+// Wanneer een nieuwe string toegevoegd moet worden, wordt er eerst gezocht naar de plaats
+// waar de string toegevoegd zal worden. Dit kan eindigen in een blad
+// waarbij een nieuwe interne top toegevoegd moet worden. Deze situatie wordt in 2 testen nagekeken.
+// In de eerste test hebben de beide strings geen gemeenschappelijke deelstring, in de 2de test wel.
+void test_add_string_without_mutual_skip() {
+    CustomTrie* ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* seven = "seven";
+    const char* seventy = "seventy";
+    const char* seventeen = "seventeen";
+
+    TEST_CHECK(customtrie_add(ct, seven));
+    TEST_CHECK(customtrie_add(ct, seventy));
+    TEST_CHECK(customtrie_add(ct, seventeen));
+
+    TEST_SIZE(ct, 3);
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 's' && strcmp(ct->root->skip, "even") == 0);
+    TEST_CHECK(ct->root->equals->character == '\0' && strcmp(ct->root->equals->skip, "") == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->string, seven) == 0);
+    TEST_CHECK(ct->root->equals->right->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->right->skip, "") == 0);
+    TEST_CHECK(ct->root->equals->right->equals->character == 'y');
+    TEST_CHECK(strcmp(ct->root->equals->right->equals->equals->string, seventy) == 0);
+    TEST_CHECK(ct->root->equals->right->equals->left->character == 'e');
+    TEST_CHECK(strcmp(ct->root->equals->right->equals->left->equals->string, seventeen) == 0);
+
+    customtrie_free(ct);
+}
+
+void test_add_string_with_mutual_skip() {
+    CustomTrie* ct = customtrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* six = "six";
+    const char* seventy = "seventy";
+    const char* seventeen = "seventeen";
+
+    TEST_CHECK(customtrie_add(ct, six));
+    TEST_CHECK(customtrie_add(ct, seventy));
+    TEST_CHECK(customtrie_add(ct, seventeen));
+
+    TEST_SIZE(ct, 3);
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 's' && strcmp(ct->root->skip, "") == 0);
+    TEST_CHECK(ct->root->equals->character == 'i' && strcmp(ct->root->equals->skip, "") == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->string, six) == 0);
+    TEST_CHECK(ct->root->equals->left->character == 'e');
+    TEST_CHECK(strcmp(ct->root->equals->left->skip, "vent") == 0);
+    TEST_CHECK(ct->root->equals->left->equals->character == 'y');
+    TEST_CHECK(strcmp(ct->root->equals->left->equals->equals->string, seventy) == 0);
+    TEST_CHECK(ct->root->equals->left->equals->left->character == 'e');
+    TEST_CHECK(strcmp(ct->root->equals->left->equals->left->equals->string, seventeen) == 0);
+
+    customtrie_free(ct);
+}
+
 // Hierbij wordt een extra woord "twenz" toegevoegd.
 // De skip ("nty") van de top die naar "twenty" en "twentytwo" gaat, moet hierdoor aangepast worden
 // naar een kortere skip ("n"). In deze test wordt nagekeken of dit correct verlopen is.
@@ -1223,6 +1283,8 @@ TEST_LIST = {
         {"customtrie init",test_init },
         { "customtrie add one",test_add_one },
         { "customtrie add more",test_add_more },
+        { "customtrie add string without mutual skip",test_add_string_without_mutual_skip },
+        { "customtrie add string with mutual skip",test_add_string_with_mutual_skip },
         { "customtrie add string smaller than skip length",test_add_string_smaller_than_skip_length},
         { "customtrie add string with different skip length",test_add_string_with_different_skip_length},
         { "customtrie search not present",test_search_not_present},

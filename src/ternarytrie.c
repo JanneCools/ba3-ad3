@@ -112,58 +112,6 @@ bool ternarytrie_add(TernaryTrie* trie, const char* string) {
     return trie_changed;
 }
 
-void rearrange_trie(BinaryNode* node) {
-    if (node->left != NULL) {
-        BinaryNode* right = node->right;
-        BinaryNode* left = node->left;
-        node->character = left->character;
-        node->left = left->left;
-        node->right = left->right;
-        node->equals = left->equals;
-        if (left->left != NULL) {
-            left->left->parent = node;
-        }
-        if (left->right != NULL) {
-            left->right->parent = node;
-        }
-        left->equals->parent = node;
-        left->left = NULL;
-        left->right = NULL;
-        left->equals = NULL;
-        left->parent = NULL;
-        free(left);
-        if (right != NULL) {
-            BinaryNode* newRight = node->right;
-            if (newRight == NULL) {
-                newRight = node;
-            }
-            while (newRight->right != NULL) {
-                newRight = newRight->right;
-            }
-            newRight->right = right;
-            right->parent = newRight;
-        }
-    } else if (node->right != NULL) {
-        BinaryNode* right = node->right;
-        node->character = right->character;
-        node->left = right->left;
-        node->right = right->right;
-        node->equals = right->equals;
-        if (right->left != NULL) {
-            right->left->parent = node;
-        }
-        if (right->right != NULL) {
-            right->right->parent = node;
-        }
-        right->equals->parent = node;
-        right->left = NULL;
-        right->right = NULL;
-        right->equals = NULL;
-        right->parent = NULL;
-        free(right);
-    }
-}
-
 bool ternarytrie_remove(TernaryTrie* trie, const char* string) {
     // de string zoeken in de boom
     BinaryNode* leaf = trie->root;

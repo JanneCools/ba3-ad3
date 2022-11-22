@@ -82,6 +82,37 @@ void test_add_more() {
     ternarytrie_free(ct);
 }
 
+// Hierbij worden 2 gelijkaardige strings toegevoegd, waardoor er een lang pad naar de bladeren zou moeten ontstaan
+void test_add_far_leafs() {
+    TernaryTrie* ct = ternarytrie_init();
+    TEST_CHECK(ct != NULL);
+
+    const char* twentyone = "twentyone";
+    const char* twentytwo = "twentytwo";
+
+    TEST_CHECK(ternarytrie_add(ct, twentyone));
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 't' && ct->root->right == NULL && ct->root->left == NULL);
+    TEST_CHECK(ct->root->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->string, twentyone) == 0);
+
+    TEST_CHECK(ternarytrie_add(ct, twentytwo));
+    TEST_SIZE(ct, 2);
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 't' && ct->root->right == NULL && ct->root->left == NULL);
+    TEST_CHECK(ct->root->equals->character == 'w' && ct->root->equals->equals->character == 'e');
+    TEST_CHECK(ct->root->equals->equals->equals->character == 'n' && ct->root->equals->equals->equals->equals->character == 't');
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->character == 'y');
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->equals->character == 'o');
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->equals->right->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->equals->string, twentyone) == 0);
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->right->equals->string, twentytwo) == 0);
+
+    ternarytrie_free(ct);
+}
+
 void test_add_similar_strings() {
     TernaryTrie* ct = ternarytrie_init();
     TEST_CHECK(ct != NULL);
@@ -175,6 +206,9 @@ void test_remove_one() {
     TEST_CHECK(ternarytrie_remove(ct, string));
     TEST_SIZE(ct, 0);
 
+    TEST_CHECK(ct->root->character == '\0');
+    TEST_CHECK(ct->root->equals == NULL && ct->root->right == NULL && ct->root->left == NULL);
+
     ternarytrie_free(ct);
 }
 
@@ -194,9 +228,44 @@ void test_remove_more() {
     TEST_SIZE(ct, 4);
 
     TEST_CHECK(ternarytrie_remove(ct, one));
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 't' && ct->root->right == NULL && ct->root->left == NULL);
+    TEST_CHECK(ct->root->equals->character == 'w' && ct->root->equals->equals->character == 'o');
+    TEST_CHECK(ct->root->equals->equals->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->string, two) == 0);
+    TEST_CHECK(ct->root->equals->equals->left->character == 'e');
+    TEST_CHECK(ct->root->equals->equals->left->equals->character == 'n');
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->character == 't');
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->equals->character == 'y');
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->equals->equals->character == '\0');
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->equals->equals->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->equals->equals->equals->equals->string, twenty) == 0);
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->equals->equals->right->character == 't');
+    TEST_CHECK(ct->root->equals->equals->left->equals->equals->equals->equals->right->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->equals->left->equals->equals->equals->equals->right->equals->string, twentytwo) == 0);
+
     TEST_CHECK(ternarytrie_remove(ct, two));
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 't' && ct->root->left == NULL && ct->root->right == NULL);
+    TEST_CHECK(ct->root->equals->character == 'w' && ct->root->equals->equals->character == 'e');
+    TEST_CHECK(ct->root->equals->equals->equals->character == 'n' && ct->root->equals->equals->equals->equals->character == 't');
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->character == 'y');
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->equals->string, twenty) == 0);
+    TEST_CHECK(ct->root->equals->equals->equals->equals->equals->equals->right->character == 't');
+    TEST_CHECK(strcmp(ct->root->equals->equals->equals->equals->equals->equals->right->equals->string, twentytwo) == 0);
+
     TEST_CHECK(ternarytrie_remove(ct, twenty));
+
+    // Structuur nakijken
+    TEST_CHECK(ct->root->character == 't');
+    TEST_CHECK(ct->root->equals->character == '\0');
+    TEST_CHECK(strcmp(ct->root->equals->string, twentytwo) == 0);
+
     TEST_CHECK(ternarytrie_remove(ct, twentytwo));
+    TEST_CHECK(ct->root->character == '\0');
 
     TEST_SIZE(ct, 0);
 
@@ -248,7 +317,7 @@ void test_remove_twenty() {
 }
 
 // Hier wordt de string "twentytwo" verwijderd. Hiermee wordt gecontroleerd dat het pad tussen "two"
-// en "twenty" zonder problemen terug verkort wordt. Dit pad was immers enkel nodig als "twenty" ook nog in de boom zat.
+// en "twenty" zonder problemen terug verkort wordt. Dit pad was immers enkel nodig als "twentytwo" ook nog in de boom zat.
 void test_remove_twentytwo() {
     TernaryTrie* ct = ternarytrie_init();
     TEST_CHECK(ct != NULL);
@@ -280,7 +349,8 @@ void test_remove_twentytwo() {
     ternarytrie_free(ct);
 }
 
-// Hier worden de string "two", "twenty", "twentyfour" en "twentyseven" toegevoegd. Dan wordt "twentyfour" verwijderd.
+// Hier worden de strings "two", "twenty", "twentyfour" en "twentyseven" toegevoegd. Dan wordt "twentyfour" verwijderd.
+// Hierbij wordt gecontroleerd of de functie "rearrange_trie" de trie correct hervormt.
 void test_remove_twentyfour() {
     TernaryTrie* ct = ternarytrie_init();
     TEST_CHECK(ct != NULL);
@@ -1123,6 +1193,7 @@ TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
         { "ternarytrie add more",test_add_more },
+        { "ternarytrie add far leafs",test_add_far_leafs },
         { "ternarytrie add similar strings",test_add_similar_strings },
         { "ternarytrie search not present",test_search_not_present},
 

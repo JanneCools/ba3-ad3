@@ -84,6 +84,7 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         trie->children[0] = newtrie;
         return true;
     }
+    ArrayTrie* root = trie;
     int index = 0;
     bool searching = true;
     ArrayTrie* parent = trie;
@@ -127,8 +128,28 @@ bool arraytrie_add(ArrayTrie* trie, const char* string) {
         trie->children_size ++;
         trie->children = realloc(trie->children, trie->children_size * sizeof(ArrayTrie*));
         trie->children[trie->children_size-1] = newleaf;
+    } else if (trie->string != NULL && parent == root && parent->children_size == 1) {
+        // we zijn geëindigd in een blad dat het enige kind is van de wortel
+        // dus we moeten de skip van de wortel aanpassen
+        index = 0;
+        trie = parent;
+        ArrayTrie* leaf = trie->children[0];
+        int skip = 0;
+        while (leaf->string[index+skip] == string[index+skip]) {
+            skip ++;
+        }
+        leaf->character = leaf->string[index+skip];     // het karakter bij het huidig blad aanpassen
+        // blad maken met de nieuwe string
+        ArrayTrie* newleaf = new_arraytrie(string[index+skip], string, 1, "\0");
+        trie->skip = realloc(trie->skip, (skip+1)*sizeof(char));
+        strncpy(trie->skip, &string[index], skip);
+        trie->skip[skip] = '\0';
+        trie->children_size = 2;
+        trie->children = realloc(trie->children, 2 * sizeof(ArrayTrie*));
+        trie->children[0] = leaf;
+        trie->children[1] = newleaf;
     } else if (trie->string != NULL) {
-        // we zijn geëindigd in een blad met een andere string
+        // we zijn geëindigd in een blad met een andere string dat niet het enige kind is van de wortel
         // Dus we moeten een nieuwe top maken met als kinderen het huidig blad en het nieuw blad
         // en met als ouder de top waar we nu zijn (trie)
         int i = 0;
