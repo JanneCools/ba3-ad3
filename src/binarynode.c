@@ -13,8 +13,8 @@ typedef struct BinaryNode {
 } BinaryNode;
 
 // bij het initialiseren van de top wordt een booleaanse waarde "skip" meegegeven die zegt of er geheugen
-// geälloceerd moet worden voor de variabele skip. Zo ja, dan krijgt de variabele gewoon waarde "\0".
-// Zo niet, dan worden paden niet gecomprimeerd of wordt de skip handmatig geälloceerd.
+// gealloceerd moet worden voor de variabele skip. Zo ja, dan krijgt de variabele gewoon waarde "\0".
+// Zo niet, dan worden paden niet gecomprimeerd of wordt de skip handmatig gealloceerd.
 BinaryNode* binarynode_init(bool skip) {
     BinaryNode* node = calloc(1, sizeof(BinaryNode));
     if (skip) {

@@ -208,6 +208,7 @@ void test_add_string_with_different_skip_length() {
     TEST_CHECK(customtrie_search(ct, twentytwo));
     TEST_CHECK(customtrie_search(ct, twentwo));
 
+    // Structuur nakijken
     TEST_CHECK(ct->root->character == 'o');
     TEST_CHECK(strcmp(ct->root->right->skip, "w") == 0);
     TEST_CHECK(strcmp(ct->root->right->equals->equals->string, two) == 0);
@@ -1339,7 +1340,7 @@ void dataset_volledig() {
     free(strings);
 }
 
-/*TEST_LIST = {
+TEST_LIST = {
         {"customtrie init",test_init },
         { "customtrie add one",test_add_one },
         { "customtrie add more",test_add_more },
@@ -1358,10 +1359,10 @@ void dataset_volledig() {
         { "customtrie remove and change skip",test_remove_and_change_skip},
         { "customtrie remove not present",test_remove_not_present},
         { NULL, NULL}
-};*/
+};
 
 // aangepaste TEST_LIST voor de datasets
-TEST_LIST = {
+/*TEST_LIST = {
         { "customtrie dataset geschud piepklein",dataset_geschud_piepklein },
         { "customtrie dataset geschud klein",dataset_geschud_klein },
         { "customtrie dataset geschud middelmaat",dataset_geschud_middelmaat },
@@ -1375,4 +1376,4 @@ TEST_LIST = {
         {"customtrie dataset zeer groot", dataset_zeer_groot},
         {"customtrie dataset volledig", dataset_volledig},
         { NULL, NULL}
-};
+};*/

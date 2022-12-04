@@ -206,6 +206,7 @@ void test_remove_one() {
     TEST_CHECK(ternarytrie_remove(ct, string));
     TEST_SIZE(ct, 0);
 
+    // Structuur nakijken
     TEST_CHECK(ct->root->character == '\0');
     TEST_CHECK(ct->root->equals == NULL && ct->root->right == NULL && ct->root->left == NULL);
 
@@ -374,6 +375,7 @@ void test_remove_twentyfour() {
 
     TEST_SIZE(ct, 3);
 
+    // Structuur nakijken
     TEST_CHECK(ct->root->character == 't');
     TEST_CHECK(strcmp(ct->root->equals->equals->equals->string, two) == 0);
     TEST_CHECK(ct->root->equals->equals->left->character == 'e');
@@ -1250,7 +1252,7 @@ void dataset_volledig() {
     free(strings);
 }
 
-/*TEST_LIST = {
+TEST_LIST = {
         {"ternarytrie init",test_init },
         { "ternarytrie add one",test_add_one },
         { "ternarytrie add more",test_add_more },
@@ -1266,10 +1268,10 @@ void dataset_volledig() {
         { "ternarytrie remove twentyfour",test_remove_twentyfour },
         { "ternarytrie remove far leafs",test_remove_far_leafs},
         { NULL, NULL}
-};*/
+};
 
 // aangepaste TEST_LIST voor de datasets
-TEST_LIST = {
+/*TEST_LIST = {
         { "ternarytrie dataset geschud piepklein",dataset_geschud_piepklein },
         { "ternarytrie dataset geschud klein",dataset_geschud_klein },
         { "ternarytrie dataset geschud middelmaat",dataset_geschud_middelmaat },
@@ -1283,4 +1285,4 @@ TEST_LIST = {
         {"ternarytrie dataset zeer groot", dataset_zeer_groot},
         {"ternarytrie dataset volledig", dataset_volledig},
         { NULL, NULL}
-};
+};*/

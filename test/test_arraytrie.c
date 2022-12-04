@@ -343,6 +343,16 @@ void test_remove_child_of_root_with_2_children() {
     TEST_CHECK(arraytrie_search(ct, twenty));
     TEST_CHECK(arraytrie_search(ct, twentytwo));
 
+    // Structuur nakijken
+    TEST_CHECK(ct->children_size == 2 && strcmp(ct->skip, "tw") == 0);
+    TEST_CHECK(ct->children[0]->character == 'o' && strcmp(ct->children[0]->string, two) == 0);
+    TEST_CHECK(ct->children[1]->character == 'e' && ct->children[1]->children_size == 2);
+    TEST_CHECK(strcmp(ct->children[1]->skip, "nty") == 0);
+    TEST_CHECK(ct->children[1]->children[0]->character == '\0');
+    TEST_CHECK(strcmp(ct->children[1]->children[0]->string, twenty) == 0);
+    TEST_CHECK(ct->children[1]->children[1]->character == 't');
+    TEST_CHECK(strcmp(ct->children[1]->children[1]->string, twentytwo) == 0);
+
     arraytrie_free(ct);
 }
 
@@ -364,6 +374,7 @@ void test_remove_child_of_root_with_2_leafs() {
     TEST_CHECK(!arraytrie_search(ct, one));
     TEST_CHECK(arraytrie_search(ct, two));
 
+    // Structuur nakijken
     TEST_CHECK(ct->children_size == 1 && strcmp(ct->skip, "") == 0);
     TEST_CHECK(ct->children[0]->character == 't' && strcmp(ct->children[0]->string, two) == 0);
 
@@ -1388,7 +1399,7 @@ void dataset_volledig() {
     free(strings);
 }
 
-/*TEST_LIST = {
+TEST_LIST = {
         { "arraytrie init",test_init },
         { "arraytrie add one",test_add_one },
         { "arraytrie add more",test_add_more },
@@ -1409,10 +1420,10 @@ void dataset_volledig() {
         { "arraytrie remove child of node with 2 leafs as children",test_remove_child_of_node_with_2_leafs_as_children},
         { "arraytrie remove child of node with more than 2 children",test_remove_child_of_node_with_more_than_2_children},
         { NULL, NULL}
-};*/
+};
 
 // aangepaste TEST_LIST voor de datasets
-TEST_LIST = {
+/*TEST_LIST = {
         { "arraytrie dataset geschud piepklein",dataset_geschud_piepklein },
         { "arraytrie dataset geschud klein",dataset_geschud_klein },
         { "arraytrie dataset geschud middelmaat",dataset_geschud_middelmaat },
@@ -1426,4 +1437,4 @@ TEST_LIST = {
         {"arraytrie dataset zeer groot", dataset_zeer_groot},
         {"arraytrie dataset volledig", dataset_volledig},
         { NULL, NULL}
-};
+};*/
